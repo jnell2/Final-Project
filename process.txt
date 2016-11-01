@@ -1,0 +1,11 @@
+Day 1:
+10/31/2016
+Overwhelmed with data, so I did research to try to find similar projects that have already been done.
+No Githubs, but a few papers. Used very basic measure and ran models achieving a maximum accuracy around 60%.
+Struggled through web scraping, found out I had to use selenium.
+Finally got my first data table loaded into a pandas dataframe.
+
+Day 2:
+11/01/2016
+Adjusted web-scraping code to get other data tables I needed.
+All are loaded into pandas dataframes.
