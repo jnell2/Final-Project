@@ -11,4 +11,12 @@ Adjusted web-scraping code to get other data tables I needed.
 All are loaded into pandas dataframes.
 Trying to scrape nhl standings, but running into 2 issues:
 1) website is same for all tabs, need to figure out how to have scraping code actually look at the "league" tab
-2) the first column of the table has 3 elements, need to figure out how to get all 3 elements. 
+2) the first column of the table has 3 elements, need to figure out how to get all 3 elements.
+
+Day 3:
+11/02/2016
+Up until 1:00, was struggling with the nhl standings webpage trying to scrape the nhl standings.
+Tried several different approaches, kept funning into issues.
+Started looking at other sources where I could get the nhl standings.
+Figured out that if I sort a table that I have already scraped in a certain way, I can get the standings.
+(Table: Season Team Summary, Sort: points, wins, games played)

@@ -87,6 +87,7 @@ def Season_TS(soup):
         mat = np.vstack((mat, row))
     df = pd.DataFrame(mat,columns = cols)
     return df
+    # can get standings from this table, as it is sorted by points, wins
 
 def Season_Shots(soup):
     '''
@@ -139,39 +140,6 @@ def Season_GA_Strength(soup):
     df = pd.DataFrame(mat,columns = cols)
     return df
 
-def get_soup_standings(url):
-    '''
-    pass in a url
-    will return html output of BeautifulSoup
-    '''
-    d = webdriver.Chrome()
-    # this will launch a new Chrome browser (maybe multiple)
-    # don't exit out until process is finished running
-    d.get(url)
-    elm = browser.find_element_by_link_text('LEAGUE')
-    browswer.implicitly_wait(5)
-    elm.click()
-    result = d.page_source
-    soup = BeautifulSoup(result, 'html.parser')
-    return soup
-
-def Season_Standings(soup):
-    '''
-    pass in html output from BeautifulSoup
-    will return a pandas dataframe
-    '''
-    full_table = soup.find("section", {"class": "g5-component--standings__full-view"})
-    cols = ['NHL', 'GP', 'W', 'L', 'OT', 'points', 'ROW', 'GF', 'GA', 'diff', \
-    'home', 'away', 'S/O', 'L10', 'streak', 'last', 'next']
-    mat = np.ndarray((0,17))
-    lst = soup.find_all('tr', attrs = {'class': ""})
-    for i in lst:
-        row = [elem.text for elem in i.find_all('td')]
-        mat = np.vstack((mat, row))
-    df = pd.DataFrame(mat,columns = cols)
-    return df
-
-
 if __name__ == '__main__':
     # client = MongoClient()
     # db = client['']
@@ -185,11 +153,10 @@ if __name__ == '__main__':
     Date_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=wins,points'.format(date1, date2)
     Date_Penalties_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=penalties&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=penaltyMinutes'.format(date1, date2)
     Date_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=hits'.format(date1, date2)
-    Season_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=wins,points'.format(season1, season2)
+    Season_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(season1, season2)
     Season_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=hits'.format(season1, season2)
     Season_GF_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsFor'.format(season1, season2)
     Season_GA_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsagainstbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsAgainst'.format(season1, season2)
-    Season_Standing_url = 'https://www.nhl.com/standings/league'
 
     soup_dts = get_soup(Date_TeamSummary_url)
     df_dts = Date_TS(soup_dts)
@@ -211,6 +178,3 @@ if __name__ == '__main__':
 
     soup_sga = get_soup(Season_GA_url)
     df_sga = Season_GA_Strength(soup_sga)
-
-    soup_stand = get_soup(Season_Standing_url)
-    df_stand = Season_Standings(soup_stand)
