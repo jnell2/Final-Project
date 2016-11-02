@@ -1,10 +1,8 @@
-from pymongo import MongoClient
 from bs4 import BeautifulSoup
 from requests import get
 import pandas as pd
 import numpy as np
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 
 # make sure that you have Google Chrome and selenium installed!
 
@@ -141,9 +139,6 @@ def Season_GA_Strength(soup):
     return df
 
 if __name__ == '__main__':
-    # client = MongoClient()
-    # db = client['']
-    # table = db['']
 
     date1 = '2016-10-12' # in format YYYY-MM-DD
     date2 = '2016-10-31' # in format YYYY-MM-DD
