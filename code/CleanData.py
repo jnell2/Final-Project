@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 
 def get_data():
+
     date1 = '2016-10-12' # in format YYYY-MM-DD
     date2 = '2016-10-31' # in format YYYY-MM-DD
     season1 = '20162017' # in format YYYYyyyy (ie: 20162017)
