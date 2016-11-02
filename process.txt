@@ -20,3 +20,19 @@ Tried several different approaches, kept funning into issues.
 Started looking at other sources where I could get the nhl standings.
 Figured out that if I sort a table that I have already scraped in a certain way, I can get the standings.
 (Table: Season Team Summary, Sort: points, wins, games played)
+
+From here, I will compile the final dataset that I will work with. I have 7 tables that I scraped.
+3 are game-by-game stats and 4 are season stats.
+I want my final data table to be cumulative stats for each team for the past 10 games.
+(or seasonal stats, like standings, missed shots [corsi, fenwick], etc.)
+There will be 30 rows (30 teams).
+For now, I think I will do this using pandas dataframes, just to save time since I wasted so much trying to get the standings.
+I will end up having 2 final pandas dataframes:
+1) the total table with all games, game-by-game, from the specified time period (only GbG data)
+2) the table with each team having a single row, add in season data, calculate fields
+First steps will be to merge my GbG pandas dataframes to keep all of the columns that I want.
+This will be df 1.
+Next steps will be to combine rows in pandas dataframe for past 10 games.
+Then I will add the SbS dataframe information that I want to keep.
+Then I will add calculated columns. 
+This will be df 2.
