@@ -34,5 +34,15 @@ First steps will be to merge my GbG pandas dataframes to keep all of the columns
 This will be df 1.
 Next steps will be to combine rows in pandas dataframe for past 10 games.
 Then I will add the SbS dataframe information that I want to keep.
-Then I will add calculated columns. 
+Then I will add calculated columns.
 This will be df 2.
+
+Day 4:
+11/03/2016
+Just realized last night that I need a different final data table.
+In order to predict wins, I need to keep information in a game-by-game format.
+So I will need 3 separate dataframes to get here.
+1) the total table with all games, game-by-game, from the specified time period (only GbG data)
+2) the table with each team having a single row (past 10 games) , add in season data, calculate fields
+3) the table with home/away teams and an indicator for whether or not the home team won.
+This will come from the GbG data. Then for each game, I will supplement the information from table 2.
