@@ -3,26 +3,25 @@ from requests import get
 import pandas as pd
 import numpy as np
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 
 # make sure that you have Google Chrome and selenium installed!
 
-def get_soup(driver, url, pages=1):
+def get_soup(url, page):
     '''
     pass in a url
     will return html output of BeautifulSoup
     uses selenium
     '''
-    d = webdriver.Chrome() # pass this in instead
+    d = webdriver.Chrome()
     # this will launch a new Chrome browser (maybe multiple)
     # don't exit out until process is finished running
     d.get(url)
+    d.find_element(By.XPATH, "//select[@class='pager-select']/option[text()='{}']".format(page))
     result = d.page_source
     soup = BeautifulSoup(result, 'html.parser')
     d.close()
     return soup
-
-def parse_pages(soup):
-
 
 def Date_TS(soup):
     '''
@@ -150,10 +149,67 @@ def Season_GA_Strength(soup):
     df = pd.DataFrame(mat,columns = cols)
     return df
 
+def Date_TS_loop(url, num_pages):
+    '''
+    pass in url and number of pages that are in the table (found below the table at the URL)
+    will return a dataframe with all of the pages together
+    gives us the df for the game-by-game team summary (total)
+    '''
+    soup_dct = {}
+    for i in range(1,num_pages+1):
+        soup_dct[i] = get_soup(url, page=i)
+    df_dct = {}
+    for p, soup in soup_dct.items():
+        df_dct[p] = Date_TS(soup)
+    for i in range(2,num_pages+1):
+        df_dct[1].append(df_dct[i])
+    df_dts = df_dct[1]
+    return df_dts
+    # del soup_dct
+    # del df_dct
+
+def Date_Penalties_loop(url, num_pages):
+    '''
+    pass in url and number of pages that are in the table (found below the table at the URL)
+    will return a dataframe with all of the pages together
+    gives us the df for the game-by-game penalties report (total)
+    '''
+    soup_dct = {}
+    for i in range(1,num_pages+1):
+        soup_dct[i] = get_soup(url, page=i)
+    df_dct = {}
+    for p, soup in soup_dct.items():
+        df_dct[p] = Date_Penalties(soup)
+    for i in range(2,num_pages+1):
+        df_dct[1].append(df_dct[i])
+    df_dp = df_dct[1]
+    return df_dp
+    # del soup_dct
+    # del df_dct
+
+def Date_Shots_loop(url, num_pages):
+    '''
+    pass in url and number of pages that are in the table (found below the table at the URL)
+    will return a dataframe with all of the pages together
+    gives us the df for the game-by-game shots report (total)
+    '''
+    soup_dct = {}
+    for i in range(1,num_pages+1):
+        soup_dct[i] = get_soup(url, page=i)
+    df_dct = {}
+    for p, soup in soup_dct.items():
+        df_dct[p] = Date_Shots(soup)
+    for i in range(2,num_pages+1):
+        df_dct[1].append(df_dct[i])
+    df_ds = df_dct[1]
+    return df_ds
+    # del soup_dct
+    # del df_dct
+
 def get_data():
 
     date1 = '2016-10-12' # in format YYYY-MM-DD
-    date2 = '2016-11-03' # in format YYYY-MM-DD
+    date2 = '2016-11-04' # in format YYYY-MM-DD, should be current date
     season1 = '20162017' # in format YYYYyyyy (ie: 20162017)
     season2 = '20162017' # in format YYYYyyyy (ie: 20162017)
     season3 = '20152016' # past season
@@ -168,27 +224,38 @@ def get_data():
     Season_GF_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsFor'.format(season1, season2)
     Season_GA_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsagainstbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsAgainst'.format(season1, season2)
 
-    soup_dts = get_soup(Date_TeamSummary_url)
-    df_dts = Date_TS(soup_dts) # pass in df=None
+    num_pages = 7 # change number of pages, get from url for any of the game-by-game tables
+    # this number will be the same for all game-by-game tables (3 in total)
 
-    soup_dp = get_soup(Date_Penalties_url)
-    df_dp = Date_Penalties(soup_dp)
+    # soup_dts = {}
+    # num_pages = 6 # change number of pages, get from url for this table
+    # for i in range(1,num_pages+1):
+    #     soup_dts[i] = get_soup(Date_TeamSummary_url, page=i)
+    # df_dct = {}
+    # for p, soup in soup_dts:
+    #     df_dct[p] = Date_TS(soup)
+    # for i in range(2,num_pages+1):
+    #     df_dct[1].append(df_dct[i])
+    # df_dts = df_dct[1]
+    # del soup_dts
+    # del df_dct
 
-    soup_ds = get_soup(Date_Shots_url)
-    df_ds = Date_Shots(soup_ds)
+    df_dts = Date_TS_loop(Date_TeamSummary_url, num_pages)
+    df_dp = Date_Penalties_loop(Date_Penalties_url, num_pages)
+    df_ds = Date_Shots_loop(Date_Shots_url, num_pages)
 
-    soup_sts = get_soup(Season_TeamSummary_url)
+    soup_sts = get_soup(Season_TeamSummary_url, page=1)
     df_sts = Season_TS(soup_sts)
-    soup_sts_past = get_soup(Season_TeamSummary_past_url)
+    soup_sts_past = get_soup(Season_TeamSummary_past_url, page=1)
     df_sts_past = Season_TS(soup_sts_past)
 
-    soup_ss = get_soup(Season_Shots_url)
+    soup_ss = get_soup(Season_Shots_url, page=1)
     df_ss = Season_Shots(soup_ss)
 
-    soup_sgf = get_soup(Season_GF_url)
+    soup_sgf = get_soup(Season_GF_url, page=1)
     df_sgf = Season_GF_Strength(soup_sgf)
 
-    soup_sga = get_soup(Season_GA_url)
+    soup_sga = get_soup(Season_GA_url, page=1)
     df_sga = Season_GA_Strength(soup_sga)
 
     return df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss, df_sgf, df_sga
