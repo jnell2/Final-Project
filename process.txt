@@ -61,3 +61,9 @@ Finally got WebScraping.py working correctly!
 Suggestion from Adam: maybe predict the goal spread instead of W/L
 Simple web app with home/away team, logo, and button to predict
 Good idea to look at length of time.
+
+Need to do this weekend:
+1) clean up pandas dataframes
+2) save dataframes as csv
+3) combine tables to get the tables that I want. want to have different time periods.
+4) if time, start running some models.
