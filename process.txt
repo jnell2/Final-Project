@@ -59,3 +59,5 @@ Maybe do some work this weekend to get further ahead--I've run into a lot of iss
 Finally got WebScraping.py working correctly!
 
 Suggestion from Adam: maybe predict the goal spread instead of W/L
+Simple web app with home/away team, logo, and button to predict
+Good idea to look at length of time.
