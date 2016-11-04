@@ -6,19 +6,23 @@ from selenium import webdriver
 
 # make sure that you have Google Chrome and selenium installed!
 
-def get_soup(url):
+def get_soup(driver, url, pages=1):
     '''
     pass in a url
     will return html output of BeautifulSoup
     uses selenium
     '''
-    d = webdriver.Chrome()
+    d = webdriver.Chrome() # pass this in instead
     # this will launch a new Chrome browser (maybe multiple)
     # don't exit out until process is finished running
     d.get(url)
     result = d.page_source
     soup = BeautifulSoup(result, 'html.parser')
+    d.close()
     return soup
+
+def parse_pages(soup):
+
 
 def Date_TS(soup):
     '''
@@ -80,7 +84,7 @@ def Season_TS(soup):
     this gets us the df for the season-by-season team summary
     '''
     full_table = soup.find("table", {"class": "stat-table"})
-    cols = ['#', 'team', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
+    cols = ['rank', 'team', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
     'ROW', 'point%', 'GF', 'GA', 'GF/GP', 'GA/GP', 'PP%','PK%', 'SF/GP', \
     'SA/GP', 'FOW%']
     mat = np.ndarray((0,20))
@@ -149,7 +153,7 @@ def Season_GA_Strength(soup):
 def get_data():
 
     date1 = '2016-10-12' # in format YYYY-MM-DD
-    date2 = '2016-10-31' # in format YYYY-MM-DD
+    date2 = '2016-11-03' # in format YYYY-MM-DD
     season1 = '20162017' # in format YYYYyyyy (ie: 20162017)
     season2 = '20162017' # in format YYYYyyyy (ie: 20162017)
     season3 = '20152016' # past season
@@ -165,7 +169,7 @@ def get_data():
     Season_GA_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsagainstbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsAgainst'.format(season1, season2)
 
     soup_dts = get_soup(Date_TeamSummary_url)
-    df_dts = Date_TS(soup_dts)
+    df_dts = Date_TS(soup_dts) # pass in df=None
 
     soup_dp = get_soup(Date_Penalties_url)
     df_dp = Date_Penalties(soup_dp)
@@ -192,3 +196,5 @@ def get_data():
 if __name__ == '__main__':
 
     df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss, df_sgf, df_sga = get_data()
+
+    # df_dts.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/DateTeamSummary.csv')
