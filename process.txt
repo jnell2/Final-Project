@@ -55,3 +55,7 @@ Day 5:
 To do today: get the rest of the pages for the data tables, clean pandas dfs,
 save as csvs, use postgres to get final data tables.
 Maybe do some work this weekend to get further ahead--I've run into a lot of issues.
+
+Finally got WebScraping.py working correctly!
+
+Suggestion from Adam: maybe predict the goal spread instead of W/L
