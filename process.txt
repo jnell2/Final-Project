@@ -46,3 +46,12 @@ So I will need 3 separate dataframes to get here.
 2) the table with each team having a single row (past 10 games) , add in season data, calculate fields
 3) the table with home/away teams and an indicator for whether or not the home team won.
 This will come from the GbG data. Then for each game, I will supplement the information from table 2.
+
+Issues: had to fix non-ascii characters. Only getting first page of data for GbG data.
+Need to do: get the rest of the pages, clean pandas dfs, save as csvs, use postgres to get final data tables.
+
+Day 5:
+11/04/2016
+To do today: get the rest of the pages for the data tables, clean pandas dfs,
+save as csvs, use postgres to get final data tables.
+Maybe do some work this weekend to get further ahead--I've run into a lot of issues.
