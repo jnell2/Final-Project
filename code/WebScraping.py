@@ -2,10 +2,12 @@ from bs4 import BeautifulSoup
 from requests import get
 import pandas as pd
 import numpy as np
+import datetime
+import dateutil.relativedelta
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
 
 # make sure that you have Google Chrome and selenium installed!
 
@@ -172,8 +174,8 @@ def Date_TS_loop(url, num_pages):
         df_dct[1] = df_dct[1].append(df_dct[i])
     df_dts = df_dct[1]
     return df_dts
-    # del soup_dct
-    # del df_dct
+    del soup_dct
+    del df_dct
 
 def Date_Penalties_loop(url, num_pages):
     '''
@@ -196,8 +198,8 @@ def Date_Penalties_loop(url, num_pages):
         df_dct[1] = df_dct[1].append(df_dct[i])
     df_dp = df_dct[1]
     return df_dp
-    # del soup_dct
-    # del df_dct
+    del soup_dct
+    del df_dct
 
 def Date_Shots_loop(url, num_pages):
     '''
@@ -220,29 +222,39 @@ def Date_Shots_loop(url, num_pages):
         df_dct[1] = df_dct[1].append(df_dct[i])
     df_ds = df_dct[1]
     return df_ds
-    # del soup_dct
-    # del df_dct
+    del soup_dct
+    del df_dct
 
 def get_data():
 
-    date1 = '2016-10-12' # in format YYYY-MM-DD
-    date2 = '2016-11-04' # in format YYYY-MM-DD, should be current date
-    season1 = '20162017' # in format YYYYyyyy (ie: 20162017)
-    season2 = '20162017' # in format YYYYyyyy (ie: 20162017)
-    season3 = '20152016' # past season
-    season4 = '20152016' # past season
+    date2 = datetime.date.today().strftime('%Y-%m-%d') # in format YYYY-MM-DD, this is the current date
+    d = datetime.datetime.strptime(date2, "%Y-%m-%d")
+    date1 = (d - dateutil.relativedelta.relativedelta(months=2)).strftime('%Y-%m-%d') #in format YYYY-MM-DD, this is 2 months before todays date
+
+    current_year = datetime.date.today().year # in format YYYY
+    prior_year = current_year - 1
+    prior_2year = current_year - 2
+    next_year = current_year + 1
+
+    if datetime.date.today().month >= 9:
+        season = str(current_year) + str(next_year)
+        past_season = str(prior_year) + str(current_year)
+    else:
+        season = str(prior_year) + str(current_year)
+        past_season = str(prior_2year) + str(prior_year)
 
     Date_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=wins,points'.format(date1, date2)
     Date_Penalties_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=penalties&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=penaltyMinutes'.format(date1, date2)
     Date_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=hits'.format(date1, date2)
-    Season_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(season1, season2)
-    Season_TeamSummary_past_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(season3, season4)
-    Season_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=hits'.format(season1, season2)
-    Season_GF_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsFor'.format(season1, season2)
-    Season_GA_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsagainstbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsAgainst'.format(season1, season2)
+    Season_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(season, season)
+    Season_TeamSummary_past_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(past_season, past_season)
+    Season_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=hits'.format(season, season)
+    Season_GF_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsFor'.format(season, season)
+    Season_GA_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsagainstbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsAgainst'.format(season, season)
 
-    num_pages = 7 # change number of pages, get from url for any of the game-by-game tables
-    # this number will be the same for all game-by-game tables (3 in total)
+    soup = get_soup(Date_TeamSummary_url, page = 1)
+    pages = soup.find('select', attrs = {'class': 'pager-select'})
+    num_pages = int(pages.text[-1])
 
     df_dts = Date_TS_loop(Date_TeamSummary_url, num_pages)
     df_dp = Date_Penalties_loop(Date_Penalties_url, num_pages)
