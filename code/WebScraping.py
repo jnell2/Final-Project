@@ -115,42 +115,6 @@ def Season_Shots(soup):
     df = pd.DataFrame(mat,columns = cols)
     return df
 
-def Season_GF_Strength(soup):
-    '''
-    pass in html output from BeautifulSoup
-    will return a pandas dataframe
-    this gets us the df for the season-by-season goal for by strength report
-    '''
-    full_table = soup.find("table", {"class": "stat-table"})
-    cols = ['#', 'team', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
-    'GF', 'GA', 'GF55', 'GF54', 'GF53', 'GF44', 'GF43', 'GF33', 'GF34', 'GF35', \
-    'GF36', 'GF45', 'GF46', 'GF56', 'GF65', 'GF64', 'GF63', 'GF/GP']
-    mat = np.ndarray((0,27))
-    lst = soup.find_all('tr', attrs = {'class': 'standard-row'})
-    for i in lst:
-        row = [elem.text for elem in i.find_all('td')]
-        mat = np.vstack((mat, row))
-    df = pd.DataFrame(mat,columns = cols)
-    return df
-
-def Season_GA_Strength(soup):
-    '''
-    pass in html output from BeautifulSoup
-    will return a pandas dataframe
-    this gets us the df for the season-by-season goals against by strength report
-    '''
-    full_table = soup.find("table", {"class": "stat-table"})
-    cols = ['#', 'team', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
-    'GF', 'GA', 'GA55', 'GA54', 'GA53', 'GA44', 'GA43', 'GA33', 'GA34', 'GA35', \
-    'GA36', 'GA45', 'GA46', 'GA56', 'GA65', 'GA64', 'GA63', 'GA/GP']
-    mat = np.ndarray((0,27))
-    lst = soup.find_all('tr', attrs = {'class': 'standard-row'})
-    for i in lst:
-        row = [elem.text for elem in i.find_all('td')]
-        mat = np.vstack((mat, row))
-    df = pd.DataFrame(mat,columns = cols)
-    return df
-
 def Date_TS_loop(url, num_pages):
     '''
     pass in url and number of pages that are in the table (found below the table at the URL)
@@ -247,8 +211,6 @@ def get_data():
     Season_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(season, season)
     Season_TeamSummary_past_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(past_season, past_season)
     Season_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=hits'.format(season, season)
-    Season_GF_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsFor'.format(season, season)
-    Season_GA_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=goalsagainstbystrength&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=goalsAgainst'.format(season, season)
 
     soup = get_soup(Date_TeamSummary_url, page = 1)
     pages = soup.find('select', attrs = {'class': 'pager-select'})
@@ -266,16 +228,10 @@ def get_data():
     soup_ss = get_soup(Season_Shots_url, page=1)
     df_ss = Season_Shots(soup_ss)
 
-    soup_sgf = get_soup(Season_GF_url, page=1)
-    df_sgf = Season_GF_Strength(soup_sgf)
-
-    soup_sga = get_soup(Season_GA_url, page=1)
-    df_sga = Season_GA_Strength(soup_sga)
-
-    return df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss, df_sgf, df_sga
+    return df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss
 
 if __name__ == '__main__':
 
-    df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss, df_sgf, df_sga = get_data()
+    df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss = get_data()
 
     # df_dts.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/DateTeamSummary.csv')

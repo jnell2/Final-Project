@@ -146,33 +146,7 @@ def clean_ss(df):
     df.drop(['#', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', 'FOW', 'FOL', 'FO', 'FOW%', 'GF'], axis=1, inplace=True)
     return df
 
-def clean_sgf(df):
-    '''
-    pass in appropriate dataframe from WebScraping.py
-    will return the clean df for the season-by-season goals for report
-    '''
-    df['team'] = df['team'].str.split().str[-1]
-    df.replace({'team': abbr_dict}, inplace = True)
-    df['GF55'] = df['GF55'].astype(int)
-    df['GF54'] = df['GF54'].astype(int)
-    df['GF45'] = df['GF45'].astype(int)
-    df = df[['team', 'GF55', 'GF54', 'GF45']]
-    return df
-
-def clean_sga(df):
-    '''
-    pass in appropriate dataframe from WebScraping.py
-    will return the clean df for the season-by-season goals against report
-    '''
-    df['team'] = df['team'].str.split().str[-1]
-    df.replace({'team': abbr_dict}, inplace = True)
-    df['GA55'] = df['GA55'].astype(int)
-    df['GA54'] = df['GA54'].astype(int)
-    df['GA45'] = df['GA45'].astype(int)
-    df = df[['team', 'GA55', 'GA54', 'GA45']]
-    return df
-
-def get_clean_data(df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss, df_sgf, df_sga):
+def get_clean_data(df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss):
     '''
     pass in the 8 dataframes, in the order listed above
     will return the cleaned up dataframes
@@ -182,9 +156,7 @@ def get_clean_data(df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss, df_sgf, df_
     df_ds = clean_ds(df_ds)
     df_sts, df_sts_past = clean_sts(df_sts, df_sts_past)
     df_ss = clean_ss(df_ss)
-    df_sgf = clean_sgf(df_sgf)
-    df_sga = clean_sga(df_sga)
-    return df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss, df_sgf, df_sga
+    return df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss
 
 def make_GbG_df(df_dts, df_dp, df_ds):
     '''
@@ -197,15 +169,13 @@ def make_GbG_df(df_dts, df_dp, df_ds):
     df['spread'] = df['GF']-df['GA']
     return df
 
-def make_season_df(df_sts, df_sts_past, df_ss, df_sgf, df_sga):
+def make_season_df(df_sts, df_sts_past, df_ss):
     '''
     pass in the 5 appropriate dataframes containing season data
     will return a single dataframe containing all season data
     '''
     df = pd.merge(df_sts, df_sts_past, how = 'left', on = ['team'])
     df = pd.merge(df, df_ss, how = 'left', on = ['team'])
-    df = pd.merge(df, df_sgf, how = 'left', on = ['team'])
-    df = pd.merge(df, df_sga, how = 'left', on = ['team'])
     df['corsi'] = df['SF']-df['SA'] # corsi-type feature
     return df
 
@@ -452,35 +422,93 @@ def make_cumulative_stats(df_all, df_games):
     df_all.loc[~df_all['elig'],'PDO_avg_2']=0
     df_all.drop('elig', axis = 1, inplace = True)
 
+    return df_all
+
+def make_cumulative_tables(df_all, df_games, df_season):
     # need to get 3 tables containing only cumulative stats for total games specified
     df10 = df_all.loc[df_all['last10']==1]
+    df10_stats = df10[['team', 'win_total_10', 'goals_total_10', 'shots_total_10', \
+    'PP%_avg_10', 'FOW%_avg_10', 'PIM_total_10', 'hits_total_10', 'blocked_total_10', \
+    'giveaways_total_10', 'takeaways_total_10', 'save%_avg_10', 'shot%_avg_10', \
+    'PDO_avg_10']]
+    df10_stats.columns = ['team', 'wins', 'goals', 'shots', 'avgPP%', 'avgFOW%', \
+    'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'avgSave%', 'avgShot%',\
+    'avgPDO']
+    df_final_10_1 = pd.merge(df_games, df10_stats, how = 'left', left_on = ['home_team'], right_on = ['team'])
+    df_final_10 = pd.merge(df_final_10_1, df10_stats, how = 'left', left_on = ['away_team'], right_on = ['team'])
+    # df_final_10.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
+    # 'spread', 'home_wins', 'home_goals', 'home_shots', 'home_avgPP%', 'home_avgFOW%', \
+    # 'home_PIM', 'home_hits', 'home_blocked', 'home_giveaways', 'home_takeaways', \
+    # 'home_avgSave%', 'home_avgShot%', 'home_avgPDO', 'away_wins', 'away_goals', \
+    # 'away_shots', 'away_avgPP%', 'away_avgFOW%', 'away_PIM', 'away_hits', \
+    # 'away_blocked', 'away_giveaways', 'away_takeaways', 'away_avgSave%', \
+    # 'away_avgShot%', 'away_avgPDO']
+
     df5 = df_all.loc[df_all['last5']==1]
+    df5_stats = df5[['team', 'win_total_5', 'goals_total_5', 'shots_total_5', \
+    'PP%_avg_5', 'FOW%_avg_5', 'PIM_total_5', 'hits_total_5', 'blocked_total_5', \
+    'giveaways_total_5', 'takeaways_total_5', 'save%_avg_5', 'shot%_avg_5', \
+    'PDO_avg_5']]
+    df5_stats.columns = ['team', 'wins', 'goals', 'shots', 'avgPP%', 'avgFOW%', \
+    'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'avgSave%', 'avgShot%',\
+    'avgPDO']
+    df_final_5_1 = pd.merge(df_games, df5_stats, how = 'left', left_on = ['home_team'], right_on = ['team'])
+    df_final_5 = pd.merge(df_final_5_1, df5_stats, how = 'left', left_on = ['away_team'], right_on = ['team'])
+    # df_final_5.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
+    # 'spread', 'home_wins', 'home_goals', 'home_shots', 'home_avgPP%', 'home_avgFOW%', \
+    # 'home_PIM', 'home_hits', 'home_blocked', 'home_giveaways', 'home_takeaways', \
+    # 'home_avgSave%', 'home_avgShot%', 'home_avgPDO', 'away_wins', 'away_goals', \
+    # 'away_shots', 'away_avgPP%', 'away_avgFOW%', 'away_PIM', 'away_hits', \
+    # 'away_blocked', 'away_giveaways', 'away_takeaways', 'away_avgSave%', \
+    # 'away_avgShot%', 'away_avgPDO']
+
     df2 = df_all.loc[df_all['last2']==1]
+    df2_stats = df2[['team', 'win_total_2', 'goals_total_2', 'shots_total_2', \
+    'PP%_avg_2', 'FOW%_avg_2', 'PIM_total_2', 'hits_total_2', 'blocked_total_2', \
+    'giveaways_total_2', 'takeaways_total_2', 'save%_avg_2', 'shot%_avg_2', \
+    'PDO_avg_2']]
+    df2_stats.columns = ['team', 'wins', 'goals', 'shots', 'avgPP%', 'avgFOW%', \
+    'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'avgSave%', 'avgShot%',\
+    'avgPDO']
+    df_final_2_1 = pd.merge(df_games, df2_stats, how = 'left', left_on = ['home_team'], right_on = ['team'])
+    df_final_2 = pd.merge(df_final_2_1, df2_stats, how = 'left', left_on = ['away_team'], right_on = ['team'])
+    # df_final_2.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
+    # 'spread', 'home_wins', 'home_goals', 'home_shots', 'home_avgPP%', 'home_avgFOW%', \
+    # 'home_PIM', 'home_hits', 'home_blocked', 'home_giveaways', 'home_takeaways', \
+    # 'home_avgSave%', 'home_avgShot%', 'home_avgPDO', 'away_wins', 'away_goals', \
+    # 'away_shots', 'away_avgPP%', 'away_avgFOW%', 'away_PIM', 'away_hits', \
+    # 'away_blocked', 'away_giveaways', 'away_takeaways', 'away_avgSave%', \
+    # 'away_avgShot%', 'away_avgPDO']
 
-    return df10, df5, df2
+    df_season['SA/GP'] = df_season['SA']/df_season['GP']
+    df_season.drop(['GP', 'L', 'GF', 'GA', 'SA', 'SF'], axis = 1, inplace = True)
+    df_season_stats_1 = pd.merge(df_games, df_season, how = 'left', left_on = ['home_team'], right_on = ['team'])
+    df_season_stats = pd.merge(df_season_stats_1, df_season, how = 'left', left_on = ['home_team'], right_on = ['team'])
+    # df_season_stats.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
+    # 'spread', 'home_rank', 'home_wins', 'home_point%', 'home_GF/GP', 'home_GA/GP', \
+    # 'home_PP%', 'home_PK%', 'home_SF/GP', 'home_SA/GP', 'home_FOW%', 'home_LS_rank', \
+    # 'home_hits', 'home_blocked', 'home_missed', 'home_giveaways', 'home_takeaways', \
+    # 'home_save%', 'home_shot%', 'home_PDO', 'home_corsi', 'away_rank', 'away_wins', \
+    # 'away_point%', 'away_GF/GP', 'away_GA/GP', 'away_PP%', 'away_PK%', 'away_SF/GP', \
+    # 'away_SA/GP', 'away_FOW%', 'away_LS_rank', 'away_hits', 'away_blocked', \
+    # 'away_missed', 'away_giveaways', 'away_takeaways', 'away_save%', 'away_shot%',
+    # 'away_PDO', 'away_corsi']
 
-    # df = pd.merge(df_games, df_all, how = 'left', left_on = ['home_team', ])
-
-
-# def games_final(df_games, df_stats):
-#     '''
-#     pass in dataframes for df_games and df_stats (returned from GbG_cumulative_df function)
-#     will return final game by game dataframes
-#     '''
-#     df_final = pd.merge(df_games, df_stats, how = 'left', on = ['team']
-#     pass
+    return df_final_10, df_final_5, df_final_2, df_season_stats
 
 if __name__ == '__main__':
 
-    df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss, df_sgf, df_sga = ws.get_data()
+    df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss = ws.get_data()
 
-    df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss, df_sgf, df_sga = \
-    get_clean_data(df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss, df_sgf, df_sga)
+    df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss = \
+    get_clean_data(df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss)
 
     df_games = make_GbG_df(df_dts, df_dp, df_ds)
-    df_season = make_season_df(df_sts, df_sts_past, df_ss, df_sgf, df_sga)
+    df_season = make_season_df(df_sts, df_sts_past, df_ss)
 
     df_all, df_games = GbG_cumulative_df(df_games)
     # df_games is the standard template, will add all cumulative stats to this
 
-    df10, df5, df2 = make_cumulative_stats(df_all, df_games)
+    df_all_new = make_cumulative_stats(df_all, df_games)
+
+    df10, df5, df2, dfs = make_cumulative_tables(df_all_new, df_games, df_season)
