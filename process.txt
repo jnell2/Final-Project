@@ -74,3 +74,14 @@ all dataframes are being collected nicely
 automated some of the process. no longer need to change page numbers or any dates.
 next steps are to clean up the dataframes, make new tables, and save these as csvs.
 dataframes are clean. next step: make necessary tables.
+
+Day 7:
+11/07/2016
+dataframes are cleaned. now need to get final 4 datatables that I need.
+tables will be game by game with cumulative stats for either past 10 games,
+past 5 games, past 2 games, or current season.
+maybe make 3 extra tables with cumulative stats for either past 10 games, past
+5 games, and past 2 games with certain season statistics mixed in.
+Total of 7 tables.
+as of 11:30, i have 3 of my final tables: the game by game tables with cumulative
+stats for past 10, 5, 2 games 

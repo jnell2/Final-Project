@@ -43,9 +43,10 @@ def clean_dts(df):
     df['date'] = df['game'].str.split().str[0]
     df['home_ind'] = df['game'].str.split().str[1]
     df['home_ind'] = df['home_ind'].map({'vs': 1, '@': 0})
-    df['L'] = df['L'] + df['OTL']
     df['W'] = df['W'].astype(int)
     df['L'] = df['L'].astype(int)
+    df['OTL'] = df['OTL'].astype(int)
+    df['L'] = df['L'] + df['OTL']
     df['GF'] = df['GF'].astype(int)
     df['GA'] = df['GA'].astype(int)
     df['SF'] = df['SF'].astype(int)
@@ -192,7 +193,7 @@ def make_GbG_dfs(df_dts, df_dp, df_ds):
     returned dataframes will contain games for past 10, 5, and 2 games, respectively
     '''
     df = pd.merge(df_dts, df_dp, how = 'left', on = ['team', 'opponent', 'date'])
-    df = pd.merge(df, df_ds, how = 'left', on ['team', 'opponent', 'date'])
+    df = pd.merge(df, df_ds, how = 'left', on = ['team', 'opponent', 'date'])
     df['spread'] = df['GF']-df['GA']
     df_last10 = df.loc[df['last10'] == 1]
     df_last5 = df.loc[df['last5'] == 1]
@@ -208,8 +209,140 @@ def make_season_df(df_sts, df_sts_past, df_ss, df_sgf, df_sga):
     df = pd.merge(df, df_ss, how = 'left', on = ['team'])
     df = pd.merge(df, df_sgf, how = 'left', on = ['team'])
     df = pd.merge(df, df_sga, how = 'left', on = ['team'])
-    df['corsi'] = df['SF'] - df['SA']
     return df
+
+def GbG_cumulative_df(df):
+    '''
+    pass in dataframe
+    will return dataframe in desired format
+    '''
+    dfc = df.copy()
+    df = df.loc[df['home_ind']==1]
+    df['shot%'] = df['GF']/df['SF']
+    df = df[['team', 'opponent', 'date', 'W', 'L', 'spread', 'GF', 'GA', 'SF', 'SA',
+    'PP%', 'FOW%', 'PIM', 'hits', 'blocked_shots', 'giveaways', \
+    'takeaways', 'save%', 'shot%']]
+    df.columns = ['home_team', 'away_team', 'date', 'home_team_win', 'away_team_win',\
+     'spread','home_goals', 'away_goals', 'home_shots', 'away_shots', 'home_PP%', \
+    'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', \
+    'home_ga', 'home_ta', 'home_save%', 'home_shot%']
+
+    dfc['shot%'] = dfc['GF']/dfc['SF']
+    dfc = dfc[['team', 'opponent', 'date', 'PP%', 'FOW%', 'PIM', \
+    'hits', 'blocked_shots', 'giveaways', 'takeaways', 'save%', 'shot%']]
+    dfc.columns = ['home_team', 'away_team', 'date', 'away_PP%', 'away_FOW%', \
+    'away_PIM', 'away_hits', 'away_blocked', 'away_ga', 'away_ta', 'away_save%', \
+    'away_shot%']
+
+    df2 = pd.merge(df, dfc, how = 'left', on = ['home_team', 'away_team', 'date'])
+    df_home = df2[['home_team', 'date', 'home_team_win', 'home_goals', 'home_shots',\
+    'home_PP%', 'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', 'home_ga',\
+    'home_ta', 'home_save%', 'home_shot%']]
+    df_home.columns = ['team', 'date', 'win', 'goals', 'shots', 'PP%', 'FOW%',\
+    'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'save%', 'shot%']
+    df_away = df2[['away_team', 'date', 'away_team_win', 'away_goals', 'away_shots', \
+    'away_PP%', 'away_FOW%', 'away_PIM', 'away_hits', 'away_blocked',  'away_ga',\
+    'away_ta', 'away_save%', 'away_shot%']]
+    df_away.columns = ['team', 'date', 'win', 'goals', 'shots', 'PP%', 'FOW%',\
+    'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'save%', 'shot%']
+
+    all_data = np.vstack((df_home, df_away))
+    df_all = pd.DataFrame(all_data)
+    df_all.columns = ['team', 'date', 'win', 'goals', 'shots', 'PP%', 'FOW%',\
+    'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'save%', 'shot%']
+    df_all['date'] = pd.to_datetime(df_all['date'])
+    df_all['win'] = df_all['win'].astype(int)
+    df_all['goals'] = df_all['goals'].astype(int)
+    df_all['shots'] = df_all['shots'].astype(int)
+    df_all['PP%'] = df_all['PP%'].astype(float)
+    df_all['FOW%'] = df_all['FOW%'].astype(float)
+    df_all['PIM'] = df_all['PIM'].astype(int)
+    df_all['hits'] = df_all['hits'].astype(int)
+    df_all['blocked'] = df_all['blocked'].astype(int)
+    df_all['giveaways'] = df_all['giveaways'].astype(int)
+    df_all['takeaways'] = df_all['takeaways'].astype(int)
+    df_all['save%'] = df_all['save%'].astype(float)
+    df_all['shot%'] = df_all['shot%'].astype(float)
+    df_all['PDO'] = df_all['save%'] + df_all['shot%']
+
+    # adding cumulative stats
+    df_all = df_all.assign(elig=(df_all['win'] ==1))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['win'].sum(), on='team', rsuffix='_total')
+    df_all.loc[~df_all['elig'],'win_total']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['goals'] > 0))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['goals'].sum(), on='team', rsuffix='_total')
+    df_all.loc[~df_all['elig'],'goals_total']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['shots'] > 0))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['shots'].sum(), on='team', rsuffix='_total')
+    df_all.loc[~df_all['elig'],'shots_total']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['PP%'] > -1))
+    df_all = df_all.join(df_all[df_stats['elig']].groupby('team')['PP%'].mean(), on='team', rsuffix='_avg')
+    df_all.loc[~df_all['elig'],'PP%_avg']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['FOW%'] > -1))
+    df_all = df_all.join(df_all[df_stats['elig']].groupby('team')['FOW%'].mean(), on='team', rsuffix='_avg')
+    df_all.loc[~df_all['elig'],'FOW%_avg']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['PIM'] > 0))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['PIM'].sum(), on='team', rsuffix='_total')
+    df_all.loc[~df_all['elig'],'PIM_total']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['hits'] > 0))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['hits'].sum(), on='team', rsuffix='_total')
+    df_all.loc[~df_all['elig'],'hits_total']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['blocked'] > 0))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['blocked'].sum(), on='team', rsuffix='_total')
+    df_all.loc[~df_all['elig'],'blocked_total']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['giveaways'] > 0))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['giveaways'].sum(), on='team', rsuffix='_total')
+    df_all.loc[~df_all['elig'],'giveaways_total']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['takeaways'] > 0))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['takeaways'].sum(), on='team', rsuffix='_total')
+    df_all.loc[~df_all['elig'],'takeaways_total']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['save%'] > 0))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['save%'].mean(), on='team', rsuffix='_avg')
+    df_all.loc[~df_all['elig'],'save%_avg']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['shot%'] > 0))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['shot%'].mean(), on='team', rsuffix='_avg')
+    df_all.loc[~df_all['elig'],'shot%_avg']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_all = df_all.assign(elig=(df_all['PDO'] > 0))
+    df_all = df_all.join(df_all[df_all['elig']].groupby('team')['PDO'].mean(), on='team', rsuffix='_avg')
+    df_all.loc[~df_all['elig'],'PDO_avg']=0
+    df_all.drop('elig', axis = 1, inplace = True)
+
+    df_games = df2[['home_team', 'away_team', 'date', 'home_team_win', 'spread']]
+
+    return df_games, df_all
+
+def games_final(df_games, df_stats):
+    '''
+    pass in dataframes for df_games and df_stats (returned from GbG_cumulative_df function)
+    will return final game by game dataframes
+    '''
+    df_final = pd.merge(df_games, df_stats, how = 'left', on = ['team']
+
+
 
 if __name__ == '__main__':
 
@@ -220,4 +353,7 @@ if __name__ == '__main__':
 
     df_last10, df_last5, df_last2 = make_GbG_dfs(df_dts, df_dp, df_ds)
     df_season = make_season_df(df_sts, df_sts_past, df_ss, df_sgf, df_sga)
-    
+
+    df_10games, df_10stats = GbG_cumulative_df(df_last10)
+    df_5games, df_5stats = GbG_cumulative_df(df_last5)
+    df_2games, df_2stats = GbG_cumulative_df(df_last2)
