@@ -72,5 +72,5 @@ Day 6:
 11/06/2016
 all dataframes are being collected nicely
 automated some of the process. no longer need to change page numbers or any dates.
-next steps are to clean up the dataframes and save these as csvs.
-if i get to this point, i'm good to go for monday. 
+next steps are to clean up the dataframes, make new tables, and save these as csvs.
+dataframes are clean. next step: make necessary tables.
