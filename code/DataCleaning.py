@@ -436,13 +436,16 @@ def make_cumulative_tables(df_all, df_games, df_season):
     'avgPDO']
     df_final_10_1 = pd.merge(df_games, df10_stats, how = 'left', left_on = ['home_team'], right_on = ['team'])
     df_final_10 = pd.merge(df_final_10_1, df10_stats, how = 'left', left_on = ['away_team'], right_on = ['team'])
-    # df_final_10.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
-    # 'spread', 'home_wins', 'home_goals', 'home_shots', 'home_avgPP%', 'home_avgFOW%', \
-    # 'home_PIM', 'home_hits', 'home_blocked', 'home_giveaways', 'home_takeaways', \
-    # 'home_avgSave%', 'home_avgShot%', 'home_avgPDO', 'away_wins', 'away_goals', \
-    # 'away_shots', 'away_avgPP%', 'away_avgFOW%', 'away_PIM', 'away_hits', \
-    # 'away_blocked', 'away_giveaways', 'away_takeaways', 'away_avgSave%', \
-    # 'away_avgShot%', 'away_avgPDO']
+    df_final_10 = df_final_10.drop_duplicates(subset = ['home_team', 'away_team', 'date'])
+    df_final_10.reset_index(drop=True)
+    df_final_10.drop(['team_x', 'team_y'], axis = 1, inplace = True)
+    df_final_10.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
+    'spread', 'home_wins', 'home_goals', 'home_shots', 'home_avgPP%', 'home_avgFOW%', \
+    'home_PIM', 'home_hits', 'home_blocked', 'home_giveaways', 'home_takeaways', \
+    'home_avgSave%', 'home_avgShot%', 'home_avgPDO', 'away_wins', 'away_goals', \
+    'away_shots', 'away_avgPP%', 'away_avgFOW%', 'away_PIM', 'away_hits', \
+    'away_blocked', 'away_giveaways', 'away_takeaways', 'away_avgSave%', \
+    'away_avgShot%', 'away_avgPDO']
 
     df5 = df_all.loc[df_all['last5']==1]
     df5_stats = df5[['team', 'win_total_5', 'goals_total_5', 'shots_total_5', \
@@ -454,13 +457,16 @@ def make_cumulative_tables(df_all, df_games, df_season):
     'avgPDO']
     df_final_5_1 = pd.merge(df_games, df5_stats, how = 'left', left_on = ['home_team'], right_on = ['team'])
     df_final_5 = pd.merge(df_final_5_1, df5_stats, how = 'left', left_on = ['away_team'], right_on = ['team'])
-    # df_final_5.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
-    # 'spread', 'home_wins', 'home_goals', 'home_shots', 'home_avgPP%', 'home_avgFOW%', \
-    # 'home_PIM', 'home_hits', 'home_blocked', 'home_giveaways', 'home_takeaways', \
-    # 'home_avgSave%', 'home_avgShot%', 'home_avgPDO', 'away_wins', 'away_goals', \
-    # 'away_shots', 'away_avgPP%', 'away_avgFOW%', 'away_PIM', 'away_hits', \
-    # 'away_blocked', 'away_giveaways', 'away_takeaways', 'away_avgSave%', \
-    # 'away_avgShot%', 'away_avgPDO']
+    df_final_5 = df_final_5.drop_duplicates(subset = ['home_team', 'away_team', 'date'])
+    df_final_5.reset_index(drop=True)
+    df_final_5.drop(['team_x', 'team_y'], axis = 1, inplace = True)
+    df_final_5.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
+    'spread', 'home_wins', 'home_goals', 'home_shots', 'home_avgPP%', 'home_avgFOW%', \
+    'home_PIM', 'home_hits', 'home_blocked', 'home_giveaways', 'home_takeaways', \
+    'home_avgSave%', 'home_avgShot%', 'home_avgPDO', 'away_wins', 'away_goals', \
+    'away_shots', 'away_avgPP%', 'away_avgFOW%', 'away_PIM', 'away_hits', \
+    'away_blocked', 'away_giveaways', 'away_takeaways', 'away_avgSave%', \
+    'away_avgShot%', 'away_avgPDO']
 
     df2 = df_all.loc[df_all['last2']==1]
     df2_stats = df2[['team', 'win_total_2', 'goals_total_2', 'shots_total_2', \
@@ -472,27 +478,31 @@ def make_cumulative_tables(df_all, df_games, df_season):
     'avgPDO']
     df_final_2_1 = pd.merge(df_games, df2_stats, how = 'left', left_on = ['home_team'], right_on = ['team'])
     df_final_2 = pd.merge(df_final_2_1, df2_stats, how = 'left', left_on = ['away_team'], right_on = ['team'])
-    # df_final_2.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
-    # 'spread', 'home_wins', 'home_goals', 'home_shots', 'home_avgPP%', 'home_avgFOW%', \
-    # 'home_PIM', 'home_hits', 'home_blocked', 'home_giveaways', 'home_takeaways', \
-    # 'home_avgSave%', 'home_avgShot%', 'home_avgPDO', 'away_wins', 'away_goals', \
-    # 'away_shots', 'away_avgPP%', 'away_avgFOW%', 'away_PIM', 'away_hits', \
-    # 'away_blocked', 'away_giveaways', 'away_takeaways', 'away_avgSave%', \
-    # 'away_avgShot%', 'away_avgPDO']
+    df_final_2 = df_final_2.drop_duplicates(subset = ['home_team', 'away_team', 'date'])
+    df_final_2.reset_index(drop=True)
+    df_final_2.drop(['team_x', 'team_y'], axis = 1, inplace = True)
+    df_final_2.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
+    'spread', 'home_wins', 'home_goals', 'home_shots', 'home_avgPP%', 'home_avgFOW%', \
+    'home_PIM', 'home_hits', 'home_blocked', 'home_giveaways', 'home_takeaways', \
+    'home_avgSave%', 'home_avgShot%', 'home_avgPDO', 'away_wins', 'away_goals', \
+    'away_shots', 'away_avgPP%', 'away_avgFOW%', 'away_PIM', 'away_hits', \
+    'away_blocked', 'away_giveaways', 'away_takeaways', 'away_avgSave%', \
+    'away_avgShot%', 'away_avgPDO']
 
     df_season['SA/GP'] = df_season['SA']/df_season['GP']
     df_season.drop(['GP', 'L', 'GF', 'GA', 'SA', 'SF'], axis = 1, inplace = True)
     df_season_stats_1 = pd.merge(df_games, df_season, how = 'left', left_on = ['home_team'], right_on = ['team'])
     df_season_stats = pd.merge(df_season_stats_1, df_season, how = 'left', left_on = ['home_team'], right_on = ['team'])
-    # df_season_stats.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
-    # 'spread', 'home_rank', 'home_wins', 'home_point%', 'home_GF/GP', 'home_GA/GP', \
-    # 'home_PP%', 'home_PK%', 'home_SF/GP', 'home_SA/GP', 'home_FOW%', 'home_LS_rank', \
-    # 'home_hits', 'home_blocked', 'home_missed', 'home_giveaways', 'home_takeaways', \
-    # 'home_save%', 'home_shot%', 'home_PDO', 'home_corsi', 'away_rank', 'away_wins', \
-    # 'away_point%', 'away_GF/GP', 'away_GA/GP', 'away_PP%', 'away_PK%', 'away_SF/GP', \
-    # 'away_SA/GP', 'away_FOW%', 'away_LS_rank', 'away_hits', 'away_blocked', \
-    # 'away_missed', 'away_giveaways', 'away_takeaways', 'away_save%', 'away_shot%',
-    # 'away_PDO', 'away_corsi']
+    df_season_stats.drop(['team_x', 'team_y'], axis = 1, inplace = True)
+    df_season_stats.columns = ['home_team', 'away_team', 'date', 'home_team_win', \
+    'spread', 'home_rank', 'home_wins', 'home_point%', 'home_GF/GP', 'home_GA/GP', \
+    'home_PP%', 'home_PK%', 'home_SF/GP', 'home_SA/GP', 'home_FOW%', 'home_LS_rank', \
+    'home_hits', 'home_blocked', 'home_missed', 'home_giveaways', 'home_takeaways', \
+    'home_save%', 'home_shot%', 'home_PDO', 'home_corsi', 'away_rank', 'away_wins', \
+    'away_point%', 'away_GF/GP', 'away_GA/GP', 'away_PP%', 'away_PK%', 'away_SF/GP', \
+    'away_SA/GP', 'away_FOW%', 'away_LS_rank', 'away_hits', 'away_blocked', \
+    'away_missed', 'away_giveaways', 'away_takeaways', 'away_save%', 'away_shot%',
+    'away_PDO', 'away_corsi']
 
     return df_final_10, df_final_5, df_final_2, df_season_stats
 
@@ -511,4 +521,5 @@ if __name__ == '__main__':
 
     df_all_new = make_cumulative_stats(df_all, df_games)
 
+    # THESE ARE THE FINAL 4 TABLES TO BE WORKING WITH
     df10, df5, df2, dfs = make_cumulative_tables(df_all_new, df_games, df_season)

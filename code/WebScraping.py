@@ -1,3 +1,4 @@
+
 from bs4 import BeautifulSoup
 from requests import get
 import pandas as pd
@@ -189,9 +190,10 @@ def Date_Shots_loop(url, num_pages):
 
 def get_data():
 
+    date1 = '2016-10-12' # start date of current season
     date2 = datetime.date.today().strftime('%Y-%m-%d') # in format YYYY-MM-DD, this is the current date
-    d = datetime.datetime.strptime(date2, "%Y-%m-%d")
-    date1 = (d - dateutil.relativedelta.relativedelta(months=2)).strftime('%Y-%m-%d') #in format YYYY-MM-DD, this is 2 months before todays date
+    # d = datetime.datetime.strptime(date2, "%Y-%m-%d")
+    # date1 = (d - dateutil.relativedelta.relativedelta(months=2)).strftime('%Y-%m-%d') #in format YYYY-MM-DD, this is 2 months before todays date
 
     current_year = datetime.date.today().year # in format YYYY
     prior_year = current_year - 1
@@ -233,5 +235,3 @@ def get_data():
 if __name__ == '__main__':
 
     df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss = get_data()
-
-    # df_dts.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/DateTeamSummary.csv')
