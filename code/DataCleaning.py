@@ -268,17 +268,13 @@ def cumulative_stats(df_all, df_games, n = 10):
 
 if __name__ == '__main__':
 
-    '''
-    UNCOMMENT THIS SECTION TO RE-RUN AND GET UP-TO-DATE DATA
-
-    df_dts, df_dp, df_ds = ws.get_data()
-
-    dts, dp, ds = get_clean_data(df_dts, df_dp, df_ds)
-
-    dts.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/dts.csv')
-    dp.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/dp.csv')
-    ds.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/ds.csv')
-    '''
+    # df_dts, df_dp, df_ds = ws.get_data()
+    #
+    # dts, dp, ds = get_clean_data(df_dts, df_dp, df_ds)
+    #
+    # dts.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/dts.csv')
+    # dp.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/dp.csv')
+    # ds.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/ds.csv')
 
     # cleaning up dataframes
     df_dts = pd.read_csv('data/dts.csv')
@@ -294,6 +290,14 @@ if __name__ == '__main__':
     df_all, df_games = GbG_cumulative_df(df_games)
     # df_all is the standard template, will add all cumulative stats to this
 
-    df_final2 = cumulative_stats(df_all, df_games, 2)
-    df_final5 = cumulative_stats(df_all, df_games, 5)
-    df_final10 = cumulative_stats(df_all, df_games, 10)
+    final2 = cumulative_stats(df_all, df_games, 2)
+    final5 = cumulative_stats(df_all, df_games, 5)
+    final10 = cumulative_stats(df_all, df_games, 10)
+    final15 = cumulative_stats(df_all, df_games, 15)
+    final20 = cumulative_stats(df_all, df_games, 20)
+
+    final2.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final2.csv')
+    final5.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final5.csv')
+    final10.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final10.csv')
+    final15.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final15.csv')
+    final20.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final20.csv')
