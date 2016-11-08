@@ -79,42 +79,42 @@ def Date_Shots(soup):
     df = pd.DataFrame(mat,columns = cols)
     return df
 
-def Season_TS(soup):
-    '''
-    pass in html output from BeautifulSoup
-    will return a pandas dataframe
-    this gets us the df for the season-by-season team summary
-    '''
-    full_table = soup.find("table", {"class": "stat-table"})
-    cols = ['rank', 'team', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
-    'ROW', 'point%', 'GF', 'GA', 'GF/GP', 'GA/GP', 'PP%','PK%', 'SF/GP', \
-    'SA/GP', 'FOW%']
-    mat = np.ndarray((0,20))
-    lst = soup.find_all('tr', attrs = {'class': 'standard-row'})
-    for i in lst:
-        row = [elem.text for elem in i.find_all('td')]
-        mat = np.vstack((mat, row))
-    df = pd.DataFrame(mat,columns = cols)
-    return df
-    # can get standings from this table, as it is sorted by points, wins
-
-def Season_Shots(soup):
-    '''
-    pass in html output from BeautifulSoup
-    will return a pandas dataframe
-    this gets us the df for the season-by-season shots report
-    '''
-    full_table = soup.find("table", {"class": "stat-table"})
-    cols = ['#', 'team', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
-    'hits', 'blocked_shots', 'missed_shots', 'giveaways', 'takeaways', 'FOW', \
-    'FOL', 'FO', 'FOW%', 'SF', 'GF', 'save%']
-    mat = np.ndarray((0,21))
-    lst = soup.find_all('tr', attrs = {'class': 'standard-row'})
-    for i in lst:
-        row = [elem.text for elem in i.find_all('td')]
-        mat = np.vstack((mat, row))
-    df = pd.DataFrame(mat,columns = cols)
-    return df
+# def Season_TS(soup):
+#     '''
+#     pass in html output from BeautifulSoup
+#     will return a pandas dataframe
+#     this gets us the df for the season-by-season team summary
+#     '''
+#     full_table = soup.find("table", {"class": "stat-table"})
+#     cols = ['rank', 'team', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
+#     'ROW', 'point%', 'GF', 'GA', 'GF/GP', 'GA/GP', 'PP%','PK%', 'SF/GP', \
+#     'SA/GP', 'FOW%']
+#     mat = np.ndarray((0,20))
+#     lst = soup.find_all('tr', attrs = {'class': 'standard-row'})
+#     for i in lst:
+#         row = [elem.text for elem in i.find_all('td')]
+#         mat = np.vstack((mat, row))
+#     df = pd.DataFrame(mat,columns = cols)
+#     return df
+#     # can get standings from this table, as it is sorted by points, wins
+#
+# def Season_Shots(soup):
+#     '''
+#     pass in html output from BeautifulSoup
+#     will return a pandas dataframe
+#     this gets us the df for the season-by-season shots report
+#     '''
+#     full_table = soup.find("table", {"class": "stat-table"})
+#     cols = ['#', 'team', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
+#     'hits', 'blocked_shots', 'missed_shots', 'giveaways', 'takeaways', 'FOW', \
+#     'FOL', 'FO', 'FOW%', 'SF', 'GF', 'save%']
+#     mat = np.ndarray((0,21))
+#     lst = soup.find_all('tr', attrs = {'class': 'standard-row'})
+#     for i in lst:
+#         row = [elem.text for elem in i.find_all('td')]
+#         mat = np.vstack((mat, row))
+#     df = pd.DataFrame(mat,columns = cols)
+#     return df
 
 def Date_TS_loop(url, num_pages):
     '''
@@ -210,9 +210,9 @@ def get_data():
     Date_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=wins,points'.format(date1, date2)
     Date_Penalties_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=penalties&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=penaltyMinutes'.format(date1, date2)
     Date_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=hits'.format(date1, date2)
-    Season_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(season, season)
-    Season_TeamSummary_past_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(past_season, past_season)
-    Season_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=hits'.format(season, season)
+    # Season_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(season, season)
+    # Season_TeamSummary_past_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(past_season, past_season)
+    # Season_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=hits'.format(season, season)
 
     soup = get_soup(Date_TeamSummary_url, page = 1)
     pages = soup.find('select', attrs = {'class': 'pager-select'})
@@ -222,16 +222,16 @@ def get_data():
     df_dp = Date_Penalties_loop(Date_Penalties_url, num_pages)
     df_ds = Date_Shots_loop(Date_Shots_url, num_pages)
 
-    soup_sts = get_soup(Season_TeamSummary_url, page=1)
-    df_sts = Season_TS(soup_sts)
-    soup_sts_past = get_soup(Season_TeamSummary_past_url, page=1)
-    df_sts_past = Season_TS(soup_sts_past)
+    # soup_sts = get_soup(Season_TeamSummary_url, page=1)
+    # df_sts = Season_TS(soup_sts)
+    # soup_sts_past = get_soup(Season_TeamSummary_past_url, page=1)
+    # df_sts_past = Season_TS(soup_sts_past)
+    #
+    # soup_ss = get_soup(Season_Shots_url, page=1)
+    # df_ss = Season_Shots(soup_ss)
 
-    soup_ss = get_soup(Season_Shots_url, page=1)
-    df_ss = Season_Shots(soup_ss)
-
-    return df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss
+    return df_dts, df_dp, df_ds
 
 if __name__ == '__main__':
 
-    df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss = get_data()
+    df_dts, df_dp, df_ds = get_data()

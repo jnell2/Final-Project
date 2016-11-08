@@ -54,6 +54,7 @@ def clean_dts(df):
     df['PP%'] = df['PP%'].astype(float)
     df['PK%'] = df['PK%'].astype(float)
     df['FOW%'] = df['FOW%'].astype(float)
+    df['date'] = pd.to_datetime(df['date'])
     df.drop(['#', 'game', 'GP', 'T', 'OTL', 'points', 'PPG', 'PP', 'timesSH', 'PPGA', 'FOW', 'FOL'], axis=1, inplace=True)
     df = df.reset_index(drop=True)
     return df
@@ -102,12 +103,16 @@ def get_clean_data(df_dts, df_dp, df_ds):
 def make_GbG_df(df_dts, df_dp, df_ds):
     '''
     pass in the three appropriate dataframes containing game-by-game data
-    will return a three dataframes with all relevant information for a GbG basis
-    returned dataframes will contain games for past 10, 5, and 2 games, respectively
+    will return a dataframe with all relevant information for a GbG basis
     '''
     df = pd.merge(df_dts, df_dp, how = 'left', on = ['team', 'opponent', 'date'])
     df = pd.merge(df, df_ds, how = 'left', on = ['team', 'opponent', 'date'])
-    df['spread'] = df['GF']-df['GA']
+    df['home_spread'] = df['GF'] - df['GA']
+    df['away_spread'] = df['GA'] - df['GF']
+    df['shot%'] = df['GF'] / df['SF']
+    df['PDO'] = df['save%'] + df['shot%']
+    df['corsi'] = df['SF'] - df['SA']
+    df['date'] = pd.to_datetime(df['date'])
     return df
 
 def GbG_cumulative_df(df):
@@ -117,48 +122,45 @@ def GbG_cumulative_df(df):
     '''
     dfc = df.copy()
     df = df.loc[df['home_ind']==1]
-    df['shot%'] = df['GF']/df['SF']
-    df['home_spread'] = df['GF'] - df['GA']
-    df['away_spread'] = - df['home_spread']
-    df = df[['team', 'opponent', 'date', 'home_spread', 'away_spread', 'W', 'L', \
-    'spread', 'GF', 'GA', 'SF', 'SA', 'PP%', 'FOW%', 'PIM', 'hits', \
-    'blocked_shots', 'giveaways', 'takeaways', 'save%', 'shot%']]
-    df.columns = ['home_team', 'away_team', 'date', 'home_spread', 'away_spread', \
-    'home_team_win', 'away_team_win', 'spread','home_goals', 'away_goals', \
+    df = df[['team', 'opponent', 'date', 'home_spread', 'away_spread', \
+    'W', 'L', 'GF', 'GA', 'SF', 'SA', 'PP%', 'FOW%', 'PIM', 'hits', \
+    'blocked_shots', 'giveaways', 'takeaways', 'save%', 'shot%', 'PDO', 'corsi']]
+    df.columns = ['home_team', 'away_team', 'date', 'home_spread', \
+    'away_spread', 'home_team_win', 'away_team_win', 'home_goals', 'away_goals', \
     'home_shots', 'away_shots', 'home_PP%', 'home_FOW%', 'home_PIM', 'home_hits', \
-    'home_blocked', 'home_ga', 'home_ta', 'home_save%', 'home_shot%']
+    'home_blocked', 'home_giveaways', 'home_takeaways', 'home_save%', 'home_shot%', \
+    'home_PDO', 'home_corsi']
 
-    dfc['shot%'] = dfc['GF']/dfc['SF']
-    dfc['home_spread'] = dfc['GF'] - df['GA']
-    dfc['away_spread'] = - dfc['home_spread']
-    dfc = dfc[['team', 'opponent', 'date', 'home_spread', 'away_spread', 'PP%', \
-    'FOW%', 'PIM', 'hits', 'blocked_shots', 'giveaways', 'takeaways', 'save%', 'shot%']]
-    dfc.columns = ['home_team', 'away_team', 'home_spread', 'away_spread', 'date', \
-    'away_PP%', 'away_FOW%', 'away_PIM', 'away_hits', 'away_blocked', 'away_ga', \
-    'away_ta', 'away_save%', 'away_shot%']
+    dfc = dfc[['team', 'opponent', 'date', 'PP%', 'FOW%', 'PIM', 'hits', \
+    'blocked_shots', 'giveaways', 'takeaways', 'save%', 'shot%', 'PDO', 'corsi']]
+    dfc.columns = ['home_team', 'away_team', 'date', 'away_PP%', 'away_FOW%', \
+    'away_PIM', 'away_hits', 'away_blocked', 'away_giveaways', 'away_takeaways',  \
+    'away_save%', 'away_shot%', 'away_PDO', 'away_corsi']
 
     df2 = pd.merge(df, dfc, how = 'left', on = ['home_team', 'away_team', 'date'])
 
     df_home = df2[['home_team', 'date', 'home_spread', 'home_team_win', 'home_goals', \
     'home_shots', 'home_PP%', 'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', \
-    'home_ga', 'home_ta', 'home_save%', 'home_shot%']]
+    'home_giveaways', 'home_takeaways', 'home_save%', 'home_shot%', 'home_PDO', \
+    'home_corsi']]
     df_home['home_ind'] = 1
     df_home.columns = ['team', 'date', 'spread', 'win', 'goals', 'shots', 'PP%', \
     'FOW%', 'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'save%', 'shot%', \
-    'home_ind']
+    'PDO', 'corsi', 'home_ind']
     df_away = df2[['away_team', 'date', 'away_spread', 'away_team_win', 'away_goals', \
     'away_shots', 'away_PP%', 'away_FOW%', 'away_PIM', 'away_hits', 'away_blocked',  \
-    'away_ga', 'away_ta', 'away_save%', 'away_shot%']]
+    'away_giveaways', 'away_takeaways', 'away_save%', 'away_shot%', 'away_PDO', \
+    'away_corsi']]
     df_away['home_ind'] = 0
     df_away.columns = ['team', 'date', 'spread', 'win', 'goals', 'shots', 'PP%', 'FOW%',\
-    'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'save%', 'shot%', \
-    'home_ind']
+    'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'save%', 'shot%', 'PDO', \
+    'corsi', 'home_ind']
 
     all_data = np.vstack((df_home, df_away))
     df_all = pd.DataFrame(all_data)
-    df_all.columns = ['team', 'date', 'win', 'goals', 'shots', 'PP%', 'FOW%',\
-    'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'save%', 'shot%', \
-    'home_ind']
+    df_all.columns = ['team', 'date', 'spread', 'win', 'goals', 'shots', 'PP%', \
+    'FOW%', 'PIM', 'hits', 'blocked', 'giveaways', 'takeaways', 'save%', 'shot%', \
+    'PDO', 'corsi', 'home_ind']
     df_all['date'] = pd.to_datetime(df_all['date'])
     df_all['spread'] = df_all['spread'].astype(int)
     df_all['win'] = df_all['win'].astype(int)
@@ -173,7 +175,6 @@ def GbG_cumulative_df(df):
     df_all['takeaways'] = df_all['takeaways'].astype(int)
     df_all['save%'] = df_all['save%'].astype(float)
     df_all['shot%'] = df_all['shot%'].astype(float)
-    df_all['PDO'] = df_all['save%'] + df_all['shot%']
     df_all['home_ind'] = df_all['home_ind'].astype(int)
     # df_all will give team by team stats for each game
 
@@ -182,12 +183,28 @@ def GbG_cumulative_df(df):
 
 if __name__ == '__main__':
 
-    df_dts, df_dp, df_ds, df_sts, df_sts_past, df_ss = ws.get_data()
+    # df_dts, df_dp, df_ds = ws.get_data()
+    # uncomment this to re-run code and get up-to date data
 
-    df_dts, df_dp, df_ds = get_clean_data(df_dts, df_dp, df_ds)
+    # dts, dp, ds = get_clean_data(df_dts, df_dp, df_ds)
+    # uncomment this to re-run code and get up-to-date data
+
+    # dts.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/dts.csv')
+    # dp.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/dp.csv')
+    # ds.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/ds.csv')
+    # uncomment this to re-run code and get up-to-date data
+
+    # cleaning up dataframes
+    df_dts = pd.read_csv('data/dts.csv')
+    df_dts = df_dts[['team', 'opponent', 'date', 'home_ind', 'W', 'L', \
+    'GF', 'GA', 'SF', 'SA', 'PP%', 'PK%', 'FOW%']]
+    df_dp = pd.read_csv('data/dp.csv')
+    df_dp = df_dp[['team', 'opponent', 'date', 'PIM', 'penalties']]
+    df_ds = pd.read_csv('data/ds.csv')
+    df_ds = df_ds[['team', 'opponent', 'date', 'hits', 'blocked_shots', \
+    'giveaways', 'takeaways', 'save%']]
 
     df_games = make_GbG_df(df_dts, df_dp, df_ds)
-
     df_all = GbG_cumulative_df(df_games)
     # df_all is the standard template, will add all cumulative stats to this
 
