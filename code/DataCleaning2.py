@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
 import WebScraping as ws
 
 abbr_dict = {'Canadiens': 'MTL',
@@ -176,23 +177,108 @@ def GbG_cumulative_df(df):
     df_all['save%'] = df_all['save%'].astype(float)
     df_all['shot%'] = df_all['shot%'].astype(float)
     df_all['home_ind'] = df_all['home_ind'].astype(int)
+    df_all['PDO'] = df_all['PDO'].astype(float)
+    df_all['corsi'] = df_all['corsi'].astype(int)
     # df_all will give team by team stats for each game
 
-    df_all.sort(['date', 'team'], ascending = True)
-    return df_all
+    df_all.sort(['date', 'team'], ascending = True, inplace = True)
+
+    df_games = df2[['home_team', 'away_team', 'date', 'home_team_win', 'home_spread']]
+    df_games.columns = ['home_team', 'away_team', 'date', 'home_team_win', 'spread']
+    df_games.sort(['date', 'home_team'], ascending = True, inplace = True)
+    df_games.reset_index(drop = True, inplace = True)
+    return df_all, df_games
+
+def cumulative_stats(df_all, df_games, n = 10):
+    '''
+    pass in df_all and df_games from GbG_cumulative_df above
+    will return final dataframe
+    '''
+    df_home = pd.DataFrame()
+
+    for row in df_games.iterrows():
+        # ONLY looking at games from 10/16 on
+        if row[1].date >= pd.to_datetime('2016-10-16'):
+            df = df_all[(df_all['team'] == row[1].home_team) & (df_all['date'] < row[1].date)]
+            df.sort('date', ascending = False, inplace = True)
+            sample = df.head(n)
+            sample = sample.mean()
+            sample = sample.to_frame()
+            sample = sample.T
+            sample.drop(['home_ind'], axis = 1, inplace = True)
+            sample.columns = ['home_spread', 'home_wins', 'home_goals', 'home_shots', \
+            'home_PP%', 'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', \
+            'home_giveaways', 'home_takeaways', 'home_save%', 'home_shot%', \
+            'home_PDO', 'home_corsi']
+            df_home = df_home.append(sample)
+            df_home.reset_index(drop=True, inplace = True)
+        else:
+            sample = np.zeros(15)
+            sample = pd.DataFrame(sample)
+            sample = sample.T
+            sample.columns = \
+            ['home_spread', 'home_wins', 'home_goals', 'home_shots', \
+            'home_PP%', 'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', \
+            'home_giveaways', 'home_takeaways', 'home_save%', 'home_shot%', \
+            'home_PDO', 'home_corsi']
+            # sample = pd.DataFrame([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], columns = \
+            # ['home_spread', 'home_wins', 'home_goals', 'home_shots', \
+            # 'home_PP%', 'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', \
+            # 'home_giveaways', 'home_takeaways', 'home_save%', 'home_shot%', \
+            # 'home_PDO', 'home_corsi'])
+            df_home = df_home.append(sample)
+            df_home.reset_index(drop = True, inplace = True)
+
+    df_away = pd.DataFrame()
+
+    for row in df_games.iterrows():
+        # ONLY looking at games from 10/16 on
+        if row[1].date >= pd.to_datetime('2016-10-16'):
+            df = df_all[(df_all['team'] == row[1].away_team) & (df_all['date'] < row[1].date)]
+            df.sort('date', ascending = False, inplace = True)
+            sample = df.head(n)
+            sample = sample.mean()
+            sample = sample.to_frame()
+            sample = sample.T
+            sample.drop(['home_ind'], axis = 1, inplace = True)
+            sample.columns = ['away_spread', 'away_wins', 'away_goals', 'away_shots', \
+            'away_PP%', 'away_FOW%', 'away_PIM', 'away_hits', 'away_blocked', \
+            'away_giveaways', 'away_takeaways', 'away_save%', 'away_shot%', \
+            'away_PDO', 'away_corsi']
+            df_away = df_away.append(sample)
+            df_away.reset_index(drop=True, inplace = True)
+        else:
+            sample = np.zeros(15)
+            sample = pd.DataFrame(sample)
+            sample = sample.T
+            sample.columns = \
+            ['away_spread', 'away_wins', 'away_goals', 'away_shots', \
+            'away_PP%', 'away_FOW%', 'away_PIM', 'away_hits', 'away_blocked', \
+            'away_giveaways', 'away_takeaways', 'away_save%', 'away_shot%', \
+            'away_PDO', 'away_corsi']
+            df_away = df_away.append(sample)
+            df_away.reset_index(drop = True, inplace = True)
+
+        total = pd.merge(df_games, df_home, how = 'left', left_index = True, right_index = True)
+        total = pd.merge(total, df_away, how = 'left', left_index = True, right_index = True)
+        final = total[total['date'] >= pd.to_datetime('2016-10-16')]
+        final.reset_index(drop = True, inplace = True)
+
+    return final
 
 if __name__ == '__main__':
 
-    # df_dts, df_dp, df_ds = ws.get_data()
-    # uncomment this to re-run code and get up-to date data
+    '''
+    UNCOMMENT THIS SECTION TO RE-RUN AND GET UP-TO-DATE DATA
 
-    # dts, dp, ds = get_clean_data(df_dts, df_dp, df_ds)
-    # uncomment this to re-run code and get up-to-date data
+    df_dts, df_dp, df_ds = ws.get_data()
 
-    # dts.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/dts.csv')
-    # dp.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/dp.csv')
-    # ds.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/ds.csv')
-    # uncomment this to re-run code and get up-to-date data
+    dts, dp, ds = get_clean_data(df_dts, df_dp, df_ds)
+
+    dts.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/dts.csv')
+    dp.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/dp.csv')
+    ds.to_csv('/home/jnell2/Documents/DataScienceImmersive/Final-Project/data/ds.csv')
+    '''
 
     # cleaning up dataframes
     df_dts = pd.read_csv('data/dts.csv')
@@ -205,10 +291,9 @@ if __name__ == '__main__':
     'giveaways', 'takeaways', 'save%']]
 
     df_games = make_GbG_df(df_dts, df_dp, df_ds)
-    df_all = GbG_cumulative_df(df_games)
+    df_all, df_games = GbG_cumulative_df(df_games)
     # df_all is the standard template, will add all cumulative stats to this
 
-    # df_all = df_all.assign(elig=(df_all['win'] ==1) & df_all['last10']==1)
-    # df_all = df_all.join(df_all[df_all['elig']].groupby('team')['win'].sum(), on='team', rsuffix='_total_10')
-    # df_all.loc[~df_all['elig'],'win_total_10']=0
-    # df_all.drop('elig', axis = 1, inplace = True)
+    df_final2 = cumulative_stats(df_all, df_games, 2)
+    df_final5 = cumulative_stats(df_all, df_games, 5)
+    df_final10 = cumulative_stats(df_all, df_games, 10)
