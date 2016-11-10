@@ -105,3 +105,4 @@ maybe try SVM and NN?
 maybe want to make a new data set with 5/10/15 data and use ratio predictors
 instead of separate H/A predictors.
 tomorrow, i want to pick a model and fine tune it.
+start making draft of presentation for friday. 
