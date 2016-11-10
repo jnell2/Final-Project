@@ -181,11 +181,11 @@ def GbG_cumulative_df(df):
     df_all['corsi'] = df_all['corsi'].astype(int)
     # df_all will give team by team stats for each game
 
-    df_all.sort(['date', 'team'], ascending = True, inplace = True)
+    df_all.sort_values(['date', 'team'], ascending = True, inplace = True)
 
     df_games = df2[['home_team', 'away_team', 'date', 'home_team_win', 'home_spread']]
     df_games.columns = ['home_team', 'away_team', 'date', 'home_team_win', 'spread']
-    df_games.sort(['date', 'home_team'], ascending = True, inplace = True)
+    df_games.sort_values(['date', 'home_team'], ascending = True, inplace = True)
     df_games.reset_index(drop = True, inplace = True)
     return df_all, df_games
 
@@ -200,7 +200,7 @@ def cumulative_stats(df_all, df_games, n = 10):
         # ONLY looking at games from 10/16 on
         if row[1].date >= pd.to_datetime('2016-10-16'):
             df = df_all[(df_all['team'] == row[1].home_team) & (df_all['date'] < row[1].date)]
-            df.sort('date', ascending = False, inplace = True)
+            df.sort_values('date', ascending = False, inplace = True)
             sample = df.head(n)
             sample = sample.mean()
             sample = sample.to_frame()
@@ -221,11 +221,6 @@ def cumulative_stats(df_all, df_games, n = 10):
             'home_PP%', 'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', \
             'home_giveaways', 'home_takeaways', 'home_save%', 'home_shot%', \
             'home_PDO', 'home_corsi']
-            # sample = pd.DataFrame([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], columns = \
-            # ['home_spread', 'home_wins', 'home_goals', 'home_shots', \
-            # 'home_PP%', 'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', \
-            # 'home_giveaways', 'home_takeaways', 'home_save%', 'home_shot%', \
-            # 'home_PDO', 'home_corsi'])
             df_home = df_home.append(sample)
             df_home.reset_index(drop = True, inplace = True)
 
@@ -294,10 +289,8 @@ if __name__ == '__main__':
     final5 = cumulative_stats(df_all, df_games, 5)
     final10 = cumulative_stats(df_all, df_games, 10)
     final15 = cumulative_stats(df_all, df_games, 15)
-    final20 = cumulative_stats(df_all, df_games, 20)
 
     final2.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final2.csv')
     final5.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final5.csv')
     final10.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final10.csv')
     final15.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final15.csv')
-    final20.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final20.csv')

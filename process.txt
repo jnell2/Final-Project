@@ -105,4 +105,32 @@ maybe try SVM and NN?
 maybe want to make a new data set with 5/10/15 data and use ratio predictors
 instead of separate H/A predictors.
 tomorrow, i want to pick a model and fine tune it.
-start making draft of presentation for friday. 
+start making draft of presentation for friday.
+
+Day 10:
+11/10/2016
+To Do Today:
+- maybe do NN
+- optimize model
+- make visualizations
+- make presentation outline
+- how to predict real time data? input home team, away team, date, return prediction
+
+Presentation outline
+- title page
+- project intro
+- web scraping, data cleaning
+- models tried
+- visualization comparing models
+- optimal model
+- predictions
+- maybe web app?
+
+5 best models:
+1) XGboost classifier, 10 games (accuracy = 62.2%)
+2) MLP, 10 games proportional (accuracy = 62.2%)
+3) MLP, 15 games proportional (accuracy = 62.2%)
+4) RF classifier, 15 games (accuracy = 60.0%)
+5) logistic, 15 games (accuracy = 60.0%)
+
+will do grid search on 5 above models. 
