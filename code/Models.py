@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from math import sqrt
-# import xgboost as xgb
+import xgboost as xgb
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LogisticRegression
@@ -127,7 +127,7 @@ def linear(X_train, X_test, y_train, y_test):
     will return y predicted values, rmse, r2
     only use this for predicting spread, variable 2 listed below (in relation to home team)
     '''
-    model = LinearRegression(fit_intercept = False, normalize = True)
+    model = LinearRegression(fit_intercept = False, normalize = True, n_jobs = -1)
     model.fit(X_train, y_train)
     model_pred = model.predict(X_test)
     model_rmse = rmse(y_test, model_pred)
@@ -179,19 +179,19 @@ def random_forest_regressor(X_train, X_test, y_train, y_test):
 
     return r2, y_pred, rmse_score, features
 
-# def xgboost(X_train, X_test, y_train, y_test):
-#     '''
-#     pass in the 4 TTS
-#     will return predictions, rmse, and accuracy
-#     '''
-#     model = xgboost.XGBClassifier()
-#     model.fit(X_train, y_train)
-#     y_pred = model.predict(X_test)
-#     predictions = [round(value) for value in y_pred]
-#     accuracy = accuracy_score(y_test, predictions)
-#     rmse_score = rmse(y_test, predictions)
-#
-#     return predictions, rmse_score, accuracy
+def xgboost(X_train, X_test, y_train, y_test):
+    '''
+    pass in the 4 TTS
+    will return predictions, rmse, and accuracy
+    '''
+    model = xgb.XGBClassifier()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    predictions = [round(value) for value in y_pred]
+    accuracy = accuracy_score(y_test, predictions)
+    rmse_score = rmse(y_test, predictions)
+
+    return predictions, rmse_score, accuracy
 
 if __name__ == '__main__':
 
@@ -287,9 +287,9 @@ if __name__ == '__main__':
     RFR15_r2, RFR15_predict, RFR15_rmse, RFR15_features = random_forest_regressor(Xtr215, Xte215, ytr215, yte215)
     RFR20_r2, RFR20_predict, RFR20_rmse, RFR20_features = random_forest_regressor(Xtr220, Xte220, ytr220, yte220)
 
-    # # XG Boost
-    # XGB2_preds, XGB2_rmse, XGB2_accuracy = xgboost(Xtr12, Xte12, ytr12, yte12)
-    # XGB5_preds, XGB5_rmse, XGB5_accuracy = xgboost(Xtr15, Xte15, ytr15, yte15)
-    # XGB10_preds, XGB10_rmse, XGB10_accuracy = xgboost(Xtr110, Xte110, ytr110, yte110)
-    # XGB15_preds, XGB15_rmse, XGB15_accuracy = xgboost(Xtr115, Xte115, ytr115, yte115)
-    # XGB20_preds, XGB20_rmse, XGB20_accuracy = xgboost(Xtr120, Xte120, ytr120, yte120)
+    # XG Boost
+    XGB2_preds, XGB2_rmse, XGB2_accuracy = xgboost(Xtr12, Xte12, ytr12, yte12)
+    XGB5_preds, XGB5_rmse, XGB5_accuracy = xgboost(Xtr15, Xte15, ytr15, yte15)
+    XGB10_preds, XGB10_rmse, XGB10_accuracy = xgboost(Xtr110, Xte110, ytr110, yte110)
+    XGB15_preds, XGB15_rmse, XGB15_accuracy = xgboost(Xtr115, Xte115, ytr115, yte115)
+    XGB20_preds, XGB20_rmse, XGB20_accuracy = xgboost(Xtr120, Xte120, ytr120, yte120)

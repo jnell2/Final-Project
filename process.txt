@@ -98,5 +98,10 @@ wrote code for more models: linear regression, RF classifier, RF Regressor
 wrote code to determine RMSE for a common way to compare models.
 all linear regressions have high RMSE score and negative R2 values?
 RF classifier with data for 15 games produces exact same accuracy score (60%) as
-logistic regression on same data, but has higher RMSE (3.xxx compared to 0.6xxx)
-still interested in doing XGboost, maybe SVM and NN?
+logistic regression on same data, with exact same RMSE
+XGboost with data for 10 games give accuracy 62.2%, rmse of 0.61.
+this is the best model so far.
+maybe try SVM and NN?
+maybe want to make a new data set with 5/10/15 data and use ratio predictors
+instead of separate H/A predictors.
+tomorrow, i want to pick a model and fine tune it.
