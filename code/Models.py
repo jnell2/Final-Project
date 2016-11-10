@@ -1,18 +1,18 @@
 import pandas as pd
 import numpy as np
 from math import sqrt
+# import xgboost as xgb
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.linear_model import LinearRegression, ElasticNet, Lasso, Ridge, SGDRegressor
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-
-
 try:
     from sklearn.model_selection import train_test_split
 except:
     from sklearn.cross_validation import train_test_split
+
 
 def make_train_test(df_final):
     '''
@@ -29,12 +29,28 @@ def make_train_test(df_final):
     df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
     # we don't want any categorical variables in the model
     X = df.values
-    columns = df.columns
 
     X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y1, test_size = 0.3, random_state = 2)
     X_train2, X_test2, y_train2, y_test2 = train_test_split(X, y2, test_size = 0.3, random_state = 2)
 
-    return X_train1, X_test1, y_train1, y_test1, X_train2, X_test2, y_train2, y_test2, columns
+    return X_train1, X_test1, y_train1, y_test1, X_train2, X_test2, y_train2, y_test2
+
+def get_X_y(df_final):
+    '''
+    import final dataframe from DataCleaning that you want to TTS
+    will return X, y matrices that will be split by TTS and column names
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+    columns = df.columns
+
+    return X, y1, y2, columns
 
 def rmse(y_true, y_pred):
     '''
@@ -63,45 +79,75 @@ def logistic(X_train, X_test, y_train, y_test):
 
     return accuracy, y_predict, rmse_score
 
+def lasso(X_train, X_test, y_train, y_test):
+    '''
+    pass in the 4 TTS outputs
+    will return y predicted values, rmse, r2
+    only use this for predicting spread, variable 2 listed below (in relation to home team)
+    '''
+    model = Lasso(alpha = 5.0, fit_intercept = False, normalize = True)
+    model.fit(X_train, y_train)
+    model_pred = model.predict(X_test)
+    model_rmse = rmse(y_test, model_pred)
+    model_r2 = model.score(X_test, y_test)
+
+    return model_pred, model_rmse, model_r2
+
+def ridge(X_train, X_test, y_train, y_test):
+    '''
+    pass in the 4 TTS outputs
+    will return y predicted values, rmse, r2
+    only use this for predicting spread, variable 2 listed below (in relation to home team)
+    '''
+    model = Ridge(alpha = 0.5, fit_intercept = False, normalize = True)
+    model.fit(X_train, y_train)
+    model_pred = model.predict(X_test)
+    model_rmse = rmse(y_test, model_pred)
+    model_r2 = model.score(X_test, y_test)
+
+    return model_pred, model_rmse, model_r2
+
+def elastic(X_train, X_test, y_train, y_test):
+    '''
+    pass in the 4 TTS outputs
+    will return y predicted values, rmse, r2
+    only use this for predicting spread, variable 2 listed below (in relation to home team)
+    '''
+    model = ElasticNet(alpha = 0.5, fit_intercept = False, normalize = True)
+    model.fit(X_train, y_train)
+    model_pred = model.predict(X_test)
+    model_rmse = rmse(y_test, model_pred)
+    model_r2 = model.score(X_test, y_test)
+
+    return model_pred, model_rmse, model_r2
+
 def linear(X_train, X_test, y_train, y_test):
     '''
     pass in the 4 TTS outputs
-    will return rmse and y predicted values for all linear regression models
+    will return y predicted values, rmse, r2
     only use this for predicting spread, variable 2 listed below (in relation to home team)
     '''
-    lasso = Lasso(alpha = 5.0, fit_intercept = False, normalize = True)
-    lasso.fit(X_train, y_train)
-    lasso_pred = lasso.predict(X_test)
-    lasso_rmse = rmse(y_test, lasso_pred)
-    lasso_r2 = lasso.score(X_test, y_test)
+    model = LinearRegression(fit_intercept = False, normalize = True)
+    model.fit(X_train, y_train)
+    model_pred = model.predict(X_test)
+    model_rmse = rmse(y_test, model_pred)
+    model_r2 = model.score(X_test, y_test)
 
-    ridge = Ridge(alpha = 0.5, fit_intercept = False, normalize = True)
-    ridge.fit(X_train, y_train)
-    ridge_pred = ridge.predict(X_test)
-    ridge_rmse = rmse(y_test, ridge_pred)
-    ridge_r2 = ridge.score(X_test, y_test)
+    return model_pred, model_rmse, model_r2
 
-    elastic = ElasticNet(alpha = 0.5, l1_ratio = 0.8, fit_intercept = False, normalize = True)
-    elastic.fit(X_train, y_train)
-    elastic_pred = elastic.predict(X_test)
-    elastic_rmse = rmse(y_test, elastic_pred)
-    elastic_r2 = elastic.score(X_test, y_test)
+def sgd(X_train, X_test, y_train, y_test):
+    '''
+    pass in the 4 TTS outputs
+    will return y predicted values, rmse, r2
+    only use this for predicting spread, variable 2 listed below (in relation to home team)
+    '''
+    model = SGDRegressor(n_iter = 100)
+    model.fit(X_train, y_train)
+    model_pred = model.predict(X_test)
+    model_rmse = rmse(y_test, model_pred)
+    model_r2 = model.score(X_test, y_test)
 
-    lr = LinearRegression(fit_intercept = False, normalize = True)
-    lr.fit(X_train, y_train)
-    lr_pred = lr.predict(X_test)
-    lr_rmse = rmse(y_test, lr_pred)
-    lr_r2 = lr.score(X_test, y_test)
-
-    sgd = SGDRegressor(n_iter = 100)
-    sgd.fit(X_train, y_train)
-    sgd_pred = sgd.predict(X_test)
-    sgd_rmse = rmse(y_test, sgd_pred)
-    sgd_r2 = sgd.score(X_test, y_test)
-
-    return lasso_rmse, lasso_pred, ridge_rmse, ridge_pred, elastic_rmse, \
-    elastic_pred, lr_rmse, lr_pred, sgd_rmse, sgd_pred, \
-    lasso_r2, ridge_r2, elastic_r2, lr_r2, sgd_r2
+    return model_pred, model_rmse, model_r2
 
 def random_forest_classifier(X_train, X_test, y_train, y_test):
     '''
@@ -133,6 +179,20 @@ def random_forest_regressor(X_train, X_test, y_train, y_test):
 
     return r2, y_pred, rmse_score, features
 
+# def xgboost(X_train, X_test, y_train, y_test):
+#     '''
+#     pass in the 4 TTS
+#     will return predictions, rmse, and accuracy
+#     '''
+#     model = xgboost.XGBClassifier()
+#     model.fit(X_train, y_train)
+#     y_pred = model.predict(X_test)
+#     predictions = [round(value) for value in y_pred]
+#     accuracy = accuracy_score(y_test, predictions)
+#     rmse_score = rmse(y_test, predictions)
+#
+#     return predictions, rmse_score, accuracy
+
 if __name__ == '__main__':
 
     # this gets the most recent final csv files
@@ -153,20 +213,26 @@ if __name__ == '__main__':
     # 2) spread
 
     # get train_test_split for 2 games
-    Xtr12, Xte12, ytr12, yte12, Xtr22, Xte22, ytr22, yte22, columns2 \
-    = make_train_test(df_final2)
+    Xtr12, Xte12, ytr12, yte12, Xtr22, Xte22, ytr22, yte22 = make_train_test(df_final2)
     # get train_test_split for 5 games
-    Xtr15, Xte15, ytr15, yte15, Xtr25, Xte25, ytr25, yte25, columns5 \
-    = make_train_test(df_final5)
+    Xtr15, Xte15, ytr15, yte15, Xtr25, Xte25, ytr25, yte25 = make_train_test(df_final5)
     # get train_test_split for 10 games
-    Xtr110, Xte110, ytr110, yte110, Xtr210, Xte210, ytr210, yte210, columns10 \
-    = make_train_test(df_final10)
+    Xtr110, Xte110, ytr110, yte110, Xtr210, Xte210, ytr210, yte210 = make_train_test(df_final10)
     # get train_test_split for 15 games
-    Xtr115, Xte115, ytr115, yte115, Xtr215, Xte215, ytr215, yte215, columns15 \
-    = make_train_test(df_final15)
+    Xtr115, Xte115, ytr115, yte115, Xtr215, Xte215, ytr215, yte215 = make_train_test(df_final15)
     # get train_test_split for 20 games
-    Xtr120, Xte120, ytr120, yte120, Xtr220, Xte220, ytr220, yte220, columns20 \
-    = make_train_test(df_final20)
+    Xtr120, Xte120, ytr120, yte120, Xtr220, Xte220, ytr220, yte220 = make_train_test(df_final20)
+
+    # get X, y matrices for 2 games
+    X_2, y1_2, y2_2, columns2 = get_X_y(df_final2)
+    # get X, y matrices for 5 games
+    X_5, y1_5, y2_5, columns5 = get_X_y(df_final5)
+    # get X, y matrices for 10 games
+    X_10, y1_10, y2_10, column10 = get_X_y(df_final10)
+    # get X, y matrices for 15 games
+    X_15, y1_15, y2_15, column15 = get_X_y(df_final15)
+    # get X, y matrices for 20 games
+    X_20, y1_20, y2_20, column20 = get_X_y(df_final20)
 
     # Logistic Regression results
     LogReg2_accuracy, LogReg2_predict, LogReg2_rmse = logistic(Xtr12, Xte12, ytr12, yte12)
@@ -176,21 +242,36 @@ if __name__ == '__main__':
     LogReg20_accuracy, LogReg20_predict, LogReg20_rmse = logistic(Xtr120, Xte120, ytr120, yte120)
 
     # Linear Regression results
-    lasso_rmse2, lasso_pred2, ridge_rmse2, ridge_pred2, elastic_rmse2, \
-    elastic_pred2, lr_rmse2, lr_pred2, sgd_rmse2, sgd_pred2, \
-    lasso_r22, ridge_r22, elastic_r22, lr_r22, sgd_r22 = linear(Xtr22, Xte22, ytr22, yte22)
-    lasso_rmse5, lasso_pred5, ridge_rmse5, ridge_pred5, elastic_rmse5, \
-    elastic_pred5, lr_rmse5, lr_pred5, sgd_rmse5, sgd_pred5, \
-    lasso_r25, ridge_r25, elastic_r25, lr_r25, sgd_r25 = linear(Xtr25, Xte25, ytr25, yte25)
-    lasso_rmse10, lasso_pred10, ridge_rmse10, ridge_pred10, elastic_rmse10, \
-    elastic_pred10, lr_rmse10, lr_pred10, sgd_rmse10, sgd_pred10, \
-    lasso_r210, ridge_r210, elastic_r210, lr_r210, sgd_r210 = linear(Xtr210, Xte210, ytr210, yte210)
-    lasso_rmse15, lasso_pred15, ridge_rmse15, ridge_pred15, elastic_rmse15, \
-    elastic_pred15, lr_rmse15, lr_pred15, sgd_rmse15, sgd_pred15, \
-    lasso_r215, ridge_r215, elastic_r215, lr_r215, sgd_r215 = linear(Xtr215, Xte215, ytr215, yte215)
-    lasso_rmse20, lasso_pred20, ridge_rmse20, ridge_pred20, elastic_rmse20, \
-    elastic_pred20, lr_rmse20, lr_pred20, sgd_rmse20, sgd_pred20, \
-    lasso_r220, ridge_r220, elastic_r220, lr_r220, sgd_r220 = linear(Xtr220, Xte220, ytr220, yte220)
+    # Lasso
+    Lasso2_pred, Lasso2_rmse, Lasso2_r2 = lasso(Xtr22, Xte22, ytr22, yte22)
+    Lasso5_pred, Lasso5_rmse, Lasso5_r2 = lasso(Xtr25, Xte25, ytr25, yte25)
+    Lasso10_pred, Lasso10_rmse, Lasso10_r2 = lasso(Xtr210, Xte210, ytr210, yte210)
+    Lasso15_pred, Lasso15_rmse, Lasso15_r2 = lasso(Xtr215, Xte215, ytr215, yte215)
+    Lasso20_pred, Lasso20_rmse, Lasso20_r2 = lasso(Xtr220, Xte220, ytr220, yte220)
+    # Ridge
+    Ridge2_pred, Ridge2_rmse, Ridge2_r2 = ridge(Xtr22, Xte22, ytr22, yte22)
+    Ridge5_pred, Ridge5_rmse, Ridge5_r2 = ridge(Xtr25, Xte25, ytr25, yte25)
+    Ridge10_pred, Ridge10_rmse, Ridge10_r2 = ridge(Xtr210, Xte210, ytr210, yte210)
+    Ridge15_pred, Ridge15_rmse, Ridge15_r2 = ridge(Xtr215, Xte215, ytr215, yte215)
+    Ridge20_pred, Ridge20_rmse, Ridge20_r2 = ridge(Xtr220, Xte220, ytr220, yte220)
+    # Elastic Net
+    EN2_pred, EN2_rmse, EN2_r2 = elastic(Xtr22, Xte22, ytr22, yte22)
+    EN5_pred, EN5_rmse, EN5_r2 = elastic(Xtr25, Xte25, ytr25, yte25)
+    EN10_pred, EN10_rmse, EN10_r2 = elastic(Xtr210, Xte210, ytr210, yte210)
+    EN15_pred, EN15_rmse, EN15_r2 = elastic(Xtr215, Xte215, ytr215, yte215)
+    EN20_pred, EN20_rmse, EN20_r2 = elastic(Xtr220, Xte220, ytr220, yte220)
+    # Linear Regression
+    LR2_pred, LR2_rmse, LR2_r2 = linear(Xtr22, Xte22, ytr22, yte22)
+    LR5_pred, LR5_rmse, LR5_r2 = linear(Xtr25, Xte25, ytr25, yte25)
+    LR10_pred, LR10_rmse, LR10_r2 = linear(Xtr210, Xte210, ytr210, yte210)
+    LR15_pred, LR15_rmse, LR15_r2 = linear(Xtr215, Xte215, ytr215, yte215)
+    LR20_pred, LR20_rmse, LR20_r2 = linear(Xtr220, Xte220, ytr220, yte220)
+    # SGD Regressor
+    SGD2_pred, SGD2_rmse, SGD2_r2 = sgd(Xtr22, Xte22, ytr22, yte22)
+    SGD5_pred, SGD5_rmse, SGD5_r2 = sgd(Xtr25, Xte25, ytr25, yte25)
+    SGD10_pred, SGD10_rmse, SGD10_r2 = sgd(Xtr210, Xte210, ytr210, yte210)
+    SGD15_pred, SGD15_rmse, SGD15_r2 = sgd(Xtr215, Xte215, ytr215, yte215)
+    SGD20_pred, SGD20_rmse, SGD20_r2 = sgd(Xtr220, Xte220, ytr220, yte220)
 
     # Random Forest Classifier results
     RFC2_accuracy, RFC2_predict, RFC2_rmse, RFC2_features = random_forest_classifier(Xtr12, Xte12, ytr12, yte12)
@@ -205,3 +286,10 @@ if __name__ == '__main__':
     RFR10_r2, RFR10_predict, RFR10_rmse, RFR10_features = random_forest_regressor(Xtr210, Xte210, ytr210, yte210)
     RFR15_r2, RFR15_predict, RFR15_rmse, RFR15_features = random_forest_regressor(Xtr215, Xte215, ytr215, yte215)
     RFR20_r2, RFR20_predict, RFR20_rmse, RFR20_features = random_forest_regressor(Xtr220, Xte220, ytr220, yte220)
+
+    # # XG Boost
+    # XGB2_preds, XGB2_rmse, XGB2_accuracy = xgboost(Xtr12, Xte12, ytr12, yte12)
+    # XGB5_preds, XGB5_rmse, XGB5_accuracy = xgboost(Xtr15, Xte15, ytr15, yte15)
+    # XGB10_preds, XGB10_rmse, XGB10_accuracy = xgboost(Xtr110, Xte110, ytr110, yte110)
+    # XGB15_preds, XGB15_rmse, XGB15_accuracy = xgboost(Xtr115, Xte115, ytr115, yte115)
+    # XGB20_preds, XGB20_rmse, XGB20_accuracy = xgboost(Xtr120, Xte120, ytr120, yte120)

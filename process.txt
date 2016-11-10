@@ -84,4 +84,19 @@ maybe make 3 extra tables with cumulative stats for either past 10 games, past
 5 games, and past 2 games with certain season statistics mixed in.
 Total of 7 tables.
 as of 11:30, i have 3 of my final tables: the game by game tables with cumulative
-stats for past 10, 5, 2 games 
+stats for past 10, 5, 2 games
+
+Day 8:
+11/08/2016
+finished cleaning up data. finally got a data table that i can work with.
+wrote code for logistic regression. got an accuracy score of 60%.
+this was using data from past 15 games, predicting W/L of home team.
+
+Day 9:
+11/09/2016
+wrote code for more models: linear regression, RF classifier, RF Regressor
+wrote code to determine RMSE for a common way to compare models.
+all linear regressions have high RMSE score and negative R2 values?
+RF classifier with data for 15 games produces exact same accuracy score (60%) as
+logistic regression on same data, but has higher RMSE (3.xxx compared to 0.6xxx)
+still interested in doing XGboost, maybe SVM and NN?
