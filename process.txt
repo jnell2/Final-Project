@@ -142,3 +142,10 @@ without:
 - shots, shot% = 66% accuracy
 - shots, save%, PDO = 66% accuracy
 - shots, shot%, PDO = 66% accuracy
+
+Day 11:
+11/11/2016
+having trouble with choosing a model. accuracy changes drastically every time
+I update my data.
+To do: replace train_test_split with KFold, pull data for last season,
+create a moving df based on most recent 10 games? 

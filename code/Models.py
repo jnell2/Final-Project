@@ -9,6 +9,8 @@ from sklearn.linear_model import LinearRegression, ElasticNet, Lasso, Ridge, SGD
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier, MLPRegressor
+from sklearn.cross_validation import KFold
+import copy
 try:
     from sklearn.model_selection import train_test_split
 except:
@@ -62,10 +64,36 @@ def make_train_test(df_final):
     # we don't want any categorical variables in the model
     X = df.values
 
-    X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y1, test_size = 0.3, random_state = 2)
-    X_train2, X_test2, y_train2, y_test2 = train_test_split(X, y2, test_size = 0.3, random_state = 2)
+    # X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y1, test_size = 0.3, random_state = 2)
+    # X_train2, X_test2, y_train2, y_test2 = train_test_split(X, y2, test_size = 0.3, random_state = 2)
 
-    return X_train1, X_test1, y_train1, y_test1, X_train2, X_test2, y_train2, y_test2
+    Xtrain = []
+    Xtest = []
+    ytrain1 = []
+    ytest1 = []
+    ytrain2 = []
+    ytest2 = []
+
+    kf = KFold(len(X), n_folds = 5)
+    for train_index, test_index in kf:
+        X_train1, X_test1 = [X[i] for i in train_index], [X[j] for j in test_index]
+        Xtrain.append(X_train1)
+        Xtest.append(X_test1)
+        y_train1, y_test1 = [y1[i] for i in train_index], [y1[j] for j in test_index]
+        ytrain1.append(y_train1)
+        ytest1.append(y_test1)
+        y_train2, y_test2 = [y2[i] for i in train_index], [y2[j] for j in test_index]
+        ytrain2.append(y_train2)
+        ytest2.append(y_test2)
+
+    X_train = np.average(Xtrain)
+    X_test = np.average(Xtest)
+    y_train1 = np.average(ytrain1)
+    y_train2 = np.average(ytrain2)
+    y_test1 = np.average(ytest1)
+    y_test2 = np.average(ytest2)
+
+    return X_train, X_test, y_train1, y_test1, y_train2, y_test2
 
 def drop_variables(df_final):
     '''
@@ -276,20 +304,20 @@ if __name__ == '__main__':
     # 2) spread
 
     # get train_test_split for 2 games
-    Xtr12, Xte12, ytr12, yte12, Xtr22, Xte22, ytr22, yte22 = make_train_test(df_final2)
+    Xtr12, Xte12, ytr12, yte12, ytr22, yte22 = make_train_test(df_final2)
     # get train_test_split for 5 games
-    Xtr15, Xte15, ytr15, yte15, Xtr25, Xte25, ytr25, yte25 = make_train_test(df_final5)
+    Xtr15, Xte15, ytr15, yte15, ytr25, yte25 = make_train_test(df_final5)
     # get train_test_split for 10 games
-    Xtr110, Xte110, ytr110, yte110, Xtr210, Xte210, ytr210, yte210 = make_train_test(df_final10)
+    Xtr110, Xte110, ytr110, yte110, ytr210, yte210 = make_train_test(df_final10)
     # get train_test_split for 15 games
-    Xtr115, Xte115, ytr115, yte115, Xtr215, Xte215, ytr215, yte215 = make_train_test(df_final15)
+    Xtr115, Xte115, ytr115, yte115, ytr215, yte215 = make_train_test(df_final15)
 
     # get train_test_split for 5 games, proportion_data
-    X1_train5, X1_test5, y1_train5, y1_test5, X2_train5, X2_test5, y2_train5, y2_test5 = make_train_test(df_final5_prop)
+    X1_train5, X1_test5, y1_train5, y1_test5, y2_train5, y2_test5 = make_train_test(df_final5_prop)
     # get train_test_split for 10 games, proportion_data
-    X1_train10, X1_test10, y1_train10, y1_test10, X2_train10, X2_test10, y2_train10, y2_test10 = make_train_test(df_final10_prop)
+    X1_train10, X1_test10, y1_train10, y1_test10, y2_train10, y2_test10 = make_train_test(df_final10_prop)
     # get train_test_split for 15 games, proportion_data
-    X1_train15, X1_test15, y1_train15, y1_test15, X2_train15, X2_test15, y2_train15, y2_test15 = make_train_test(df_final15_prop)
+    X1_train15, X1_test15, y1_train15, y1_test15, y2_train15, y2_test15 = make_train_test(df_final15_prop)
 
     # Logistic Regression results
     LogReg2_accuracy, LogReg2_predict = logistic(Xtr12, Xte12, ytr12, yte12)
@@ -300,127 +328,127 @@ if __name__ == '__main__':
     LogReg10pred_accuracy, LogReg10pred_predict = logistic(X1_train10, X1_test10, y1_train10, y1_test10)
     LogReg15pred_accuracy, LogReg15pred_predict = logistic(X1_train15, X1_test15, y1_train15, y1_test15)
 
-    # Linear Regression results
-    # Lasso
-    Lasso2_pred, Lasso2_accuracy = lasso(Xtr22, Xte22, ytr22, yte12)
-    Lasso5_pred, Lasso5_accuracy = lasso(Xtr25, Xte25, ytr25, yte15)
-    Lasso10_pred, Lasso10_accuracy = lasso(Xtr210, Xte210, ytr210, yte110)
-    Lasso15_pred, Lasso15_accuracy = lasso(Xtr215, Xte215, ytr215, yte115)
-    Lasso5pred_pred, Lasso5pred_accuracy = lasso(X2_train5, X2_test5, y2_train5, y1_test5)
-    Lasso10pred_pred, Lasso10pred_accuracy = lasso(X2_train10, X2_test10, y2_train10, y1_test10)
-    Lasso15pred_pred, Lasso15pred_accuracy = lasso(X2_train15, X2_test15, y2_train15, y1_test15)
-    # Ridge
-    Ridge2_pred, Ridge2_accuracy = ridge(Xtr22, Xte22, ytr22, yte12)
-    Ridge5_pred, Ridge5_accuracy = ridge(Xtr25, Xte25, ytr25, yte15)
-    Ridge10_pred, Ridge10_accuracy = ridge(Xtr210, Xte210, ytr210, yte110)
-    Ridge15_pred, Ridge15_accuracy = ridge(Xtr215, Xte215, ytr215, yte115)
-    Ridge5pred_pred, Ridge5pred_accuracy = ridge(X2_train5, X2_test5, y2_train5, y1_test5)
-    Ridge10pred_pred, Ridge10pred_accuracy = ridge(X2_train10, X2_test10, y2_train10, y1_test10)
-    Ridge15pred_pred, Ridge15pred_accuracy = ridge(X2_train15, X2_test15, y2_train15, y1_test15)
-    # Elastic Net
-    EN2_pred, EN2_accuracy = elastic(Xtr22, Xte22, ytr22, yte12)
-    EN5_pred, EN5_accuracy = elastic(Xtr25, Xte25, ytr25, yte15)
-    EN10_pred, EN10_accuracy = elastic(Xtr210, Xte210, ytr210, yte110)
-    EN15_pred, EN15_accuracy = elastic(Xtr215, Xte215, ytr215, yte115)
-    EN5pred_pred, EN5pred_accuracy = elastic(X2_train5, X2_test5, y2_train5, y1_test5)
-    EN10pred_pred, EN10pred_accuracy = elastic(X2_train10, X2_test10, y2_train10, y1_test10)
-    EN15pred_pred, EN15pred_accuracy = elastic(X2_train15, X2_test15, y2_train15, y1_test15)
-    # Linear Regression
-    LR2_pred, LR2_accuracy = linear(Xtr22, Xte22, ytr22, yte12)
-    LR5_pred, LR5_accuracy = linear(Xtr25, Xte25, ytr25, yte15)
-    LR10_pred, LR10_accuracy = linear(Xtr210, Xte210, ytr210, yte110)
-    LR15_pred, LR15_accuracy = linear(Xtr215, Xte215, ytr215, yte115)
-    LR5pred_pred, LR5pred_accuracy = linear(X2_train5, X2_test5, y2_train5, y1_test5)
-    LR10pred_pred, LR10pred_accuracy = linear(X2_train10, X2_test10, y2_train10, y1_test10)
-    LR15pred_pred, LR15pred_accuracy = linear(X2_train15, X2_test15, y2_train15, y1_test15)
-    # SGD Regressor
-    SGD2_pred, SGD2_accuracy = sgd(Xtr22, Xte22, ytr22, yte12)
-    SGD5_pred, SGD5_accuracy = sgd(Xtr25, Xte25, ytr25, yte15)
-    SGD10_pred, SGD10_accuracy = sgd(Xtr210, Xte210, ytr210, yte110)
-    SGD15_pred, SGD15_accuracy = sgd(Xtr215, Xte215, ytr215, yte115)
-    SGD5pred_pred, SGD5pred_accuracy = sgd(X2_train5, X2_test5, y2_train5, y1_test5)
-    SGD10pred_pred, SGD10pred_accuracy = sgd(X2_train10, X2_test10, y2_train10, y1_test10)
-    SGD15pred_pred, SGD15pred_accuracy = sgd(X2_train15, X2_test15, y2_train15, y1_test15)
-
-    # Random Forest Classifier results
-    RFC2_accuracy, RFC2_pred, RFC2_features = random_forest_classifier(Xtr12, Xte12, ytr12, yte12)
-    RFC5_accuracy, RFC5_pred, RFC5_features = random_forest_classifier(Xtr15, Xte15, ytr15, yte15)
-    RFC10_accuracy, RFC10_pred, RFC10_features = random_forest_classifier(Xtr110, Xte110, ytr110, yte110)
-    RFC15_accuracy, RFC15_pred, RFC15_features = random_forest_classifier(Xtr115, Xte115, ytr115, yte115)
-    RFC5pred_accuracy, RFC5pred_pred, RFC5pred_features = random_forest_classifier(X1_train5, X1_test5, y1_train5, y1_test5)
-    RFC10pred_accuracy, RFC10pred_pred, RFC10pred_features = random_forest_classifier(X1_train10, X1_test10, y1_train10, y1_test10)
-    RFC15pred_accuracy, RFC15pred_pred, RFC15pred_features = random_forest_classifier(X1_train15, X1_test15, y1_train15, y1_test15)
-
-    # Random Forest Regressor results
-    RFR2_pred, RFR2_accuracy, RFR2_features = random_forest_regressor(Xtr22, Xte22, ytr22, yte12)
-    RFR5_pred, RFR5_accuracy, RFR5_features = random_forest_regressor(Xtr25, Xte25, ytr25, yte15)
-    RFR10_pred, RFR10_accuracy, RFR10_features = random_forest_regressor(Xtr210, Xte210, ytr210, yte110)
-    RFR15_pred, RFR15_accuracy, RFR15_features = random_forest_regressor(Xtr215, Xte215, ytr215, yte115)
-    RFR5pred_pred, RFR5pred_accuracy, RFR5pred_features = random_forest_regressor(X2_train5, X2_test5, y2_train5, y1_test5)
-    RFR10pred_pred, RFR10pred_accuracy, RFR10pred_features = random_forest_regressor(X2_train10, X2_test10, y2_train10, y1_test10)
-    RFR15pred_pred, RFR15pred_accuracy, RFR15pred_features = random_forest_regressor(X2_train15, X2_test15, y2_train15, y1_test15)
-
-    # XG Boost results
-    XGB2_preds, XGB2_accuracy = xgboost(Xtr12, Xte12, ytr12, yte12)
-    XGB5_preds, XGB5_accuracy = xgboost(Xtr15, Xte15, ytr15, yte15)
-    XGB10_preds, XGB10_accuracy = xgboost(Xtr110, Xte110, ytr110, yte110)
-    XGB15_preds, XGB15_accuracy = xgboost(Xtr115, Xte115, ytr115, yte115)
-    XGB5pred_preds, XGB5pred_accuracy = xgboost(X1_train5, X1_test5, y1_train5, y1_test5)
-    XGB10pred_preds, XGB10pred_accuracy = xgboost(X1_train10, X1_test10, y1_train10, y1_test10)
-    XGB15pred_preds, XGB15pred_accuracy = xgboost(X1_train15, X1_test15, y1_train15, y1_test15)
-
-    # XG Boost Regressor results
-    XGBr2_preds, XGBr2_accuracy = xgboost_reg(Xtr22, Xte22, ytr22, yte12)
-    XGBr5_preds, XGBr5_accuracy = xgboost_reg(Xtr25, Xte25, ytr25, yte15)
-    XGBr10_preds, XGBr10_accuracy = xgboost_reg(Xtr210, Xte210, ytr210, yte110)
-    XGBr15_preds, XGBr15_accuracy = xgboost_reg(Xtr215, Xte215, ytr215, yte115)
-    XGBr5pred_preds, XGBr5pred_accuracy = xgboost_reg(X2_train5, X2_test5, y2_train5, y1_test5)
-    XGBr10pred_preds, XGBr10pred_accuracy = xgboost_reg(X2_train10, X2_test10, y2_train10, y1_test10)
-    XGBr15pred_preds, XGBr15pred_accuracy = xgboost_reg(X2_train15, X2_test15, y2_train15, y1_test15)
-
-    # MLP results
-    MLP2_preds, MLP2_accuracy = mlp(Xtr12, Xte12, ytr12, yte12)
-    MLP5_preds, MLP5_accuracy = mlp(Xtr15, Xte15, ytr15, yte15)
-    MLP10_preds, MLP10_accuracy = mlp(Xtr110, Xte110, ytr110, yte110)
-    MLP15_preds, MLP15_accuracy = mlp(Xtr115, Xte115, ytr115, yte115)
-    MLP5pred_preds, MLP5pred_accuracy = mlp(X1_train5, X1_test5, y1_train5, y1_test5)
-    MLP10pred_preds, MLP10pred_accuracy = mlp(X1_train10, X1_test10, y1_train10, y1_test10)
-    MLP15pred_preds, MLP15pred_accuracy = mlp(X1_train15, X1_test15, y1_train15, y1_test15)
-
-    # Gradient Boosting Classifier results
-    GBC2_preds, GBC2_accuracy = gbc(Xtr12, Xte12, ytr12, yte12)
-    GBC5_preds, GBC5_accuracy = gbc(Xtr15, Xte15, ytr15, yte15)
-    GBC10_preds, GBC10_accuracy = gbc(Xtr110, Xte110, ytr110, yte110)
-    GBC15_preds, GBC15_accuracy = gbc(Xtr115, Xte115, ytr115, yte115)
-    GBC5pred_preds, GBC5pred_accuracy = gbc(X1_train5, X1_test5, y1_train5, y1_test5)
-    GBC10pred_preds, GBC10pred_accuracy = gbc(X1_train10, X1_test10, y1_train10, y1_test10)
-    GBC15pred_preds, GBC15pred_accuracy = gbc(X1_train15, X1_test15, y1_train15, y1_test15)
-
-    print 'LogReg15_accuracy'
-    print LogReg15_accuracy
-    print 'SGD2_accuracy'
-    print SGD2_accuracy
-    print 'RFR10_accuracy'
-    print RFR10_accuracy
-    print 'LogReg10pred_accuracy'
-    print LogReg10pred_accuracy
-    print 'LogReg15pred_accuracy'
-    print LogReg10pred_accuracy
-    print 'Lasso10_accuracy'
-    print Lasso10_accuracy
-    print 'Lasso15_accuracy'
-    print Lasso15_accuracy
-    print 'Ridge10_accuracy'
-    print Ridge10_accuracy
-    print 'Ridge15_accuracy'
-    print Ridge15_accuracy
-    print 'LR10_accuracy'
-    print LR10_accuracy
-    print 'LR15_accuracy'
-    print LR15_accuracy
-    print 'RFR10pred_accuracy'
-    print RFR10pred_accuracy
-    print 'XGBr10_accuracy'
-    print XGBr10_accuracy
-    print 'MLP5pred_accuracy'
-    print MLP5pred_accuracy
+    # # Linear Regression results
+    # # Lasso
+    # Lasso2_pred, Lasso2_accuracy = lasso(Xtr22, Xte22, ytr22, yte12)
+    # Lasso5_pred, Lasso5_accuracy = lasso(Xtr25, Xte25, ytr25, yte15)
+    # Lasso10_pred, Lasso10_accuracy = lasso(Xtr210, Xte210, ytr210, yte110)
+    # Lasso15_pred, Lasso15_accuracy = lasso(Xtr215, Xte215, ytr215, yte115)
+    # Lasso5pred_pred, Lasso5pred_accuracy = lasso(X2_train5, X2_test5, y2_train5, y1_test5)
+    # Lasso10pred_pred, Lasso10pred_accuracy = lasso(X2_train10, X2_test10, y2_train10, y1_test10)
+    # Lasso15pred_pred, Lasso15pred_accuracy = lasso(X2_train15, X2_test15, y2_train15, y1_test15)
+    # # Ridge
+    # Ridge2_pred, Ridge2_accuracy = ridge(Xtr22, Xte22, ytr22, yte12)
+    # Ridge5_pred, Ridge5_accuracy = ridge(Xtr25, Xte25, ytr25, yte15)
+    # Ridge10_pred, Ridge10_accuracy = ridge(Xtr210, Xte210, ytr210, yte110)
+    # Ridge15_pred, Ridge15_accuracy = ridge(Xtr215, Xte215, ytr215, yte115)
+    # Ridge5pred_pred, Ridge5pred_accuracy = ridge(X2_train5, X2_test5, y2_train5, y1_test5)
+    # Ridge10pred_pred, Ridge10pred_accuracy = ridge(X2_train10, X2_test10, y2_train10, y1_test10)
+    # Ridge15pred_pred, Ridge15pred_accuracy = ridge(X2_train15, X2_test15, y2_train15, y1_test15)
+    # # Elastic Net
+    # EN2_pred, EN2_accuracy = elastic(Xtr22, Xte22, ytr22, yte12)
+    # EN5_pred, EN5_accuracy = elastic(Xtr25, Xte25, ytr25, yte15)
+    # EN10_pred, EN10_accuracy = elastic(Xtr210, Xte210, ytr210, yte110)
+    # EN15_pred, EN15_accuracy = elastic(Xtr215, Xte215, ytr215, yte115)
+    # EN5pred_pred, EN5pred_accuracy = elastic(X2_train5, X2_test5, y2_train5, y1_test5)
+    # EN10pred_pred, EN10pred_accuracy = elastic(X2_train10, X2_test10, y2_train10, y1_test10)
+    # EN15pred_pred, EN15pred_accuracy = elastic(X2_train15, X2_test15, y2_train15, y1_test15)
+    # # Linear Regression
+    # LR2_pred, LR2_accuracy = linear(Xtr22, Xte22, ytr22, yte12)
+    # LR5_pred, LR5_accuracy = linear(Xtr25, Xte25, ytr25, yte15)
+    # LR10_pred, LR10_accuracy = linear(Xtr210, Xte210, ytr210, yte110)
+    # LR15_pred, LR15_accuracy = linear(Xtr215, Xte215, ytr215, yte115)
+    # LR5pred_pred, LR5pred_accuracy = linear(X2_train5, X2_test5, y2_train5, y1_test5)
+    # LR10pred_pred, LR10pred_accuracy = linear(X2_train10, X2_test10, y2_train10, y1_test10)
+    # LR15pred_pred, LR15pred_accuracy = linear(X2_train15, X2_test15, y2_train15, y1_test15)
+    # # SGD Regressor
+    # SGD2_pred, SGD2_accuracy = sgd(Xtr22, Xte22, ytr22, yte12)
+    # SGD5_pred, SGD5_accuracy = sgd(Xtr25, Xte25, ytr25, yte15)
+    # SGD10_pred, SGD10_accuracy = sgd(Xtr210, Xte210, ytr210, yte110)
+    # SGD15_pred, SGD15_accuracy = sgd(Xtr215, Xte215, ytr215, yte115)
+    # SGD5pred_pred, SGD5pred_accuracy = sgd(X2_train5, X2_test5, y2_train5, y1_test5)
+    # SGD10pred_pred, SGD10pred_accuracy = sgd(X2_train10, X2_test10, y2_train10, y1_test10)
+    # SGD15pred_pred, SGD15pred_accuracy = sgd(X2_train15, X2_test15, y2_train15, y1_test15)
+    #
+    # # Random Forest Classifier results
+    # RFC2_accuracy, RFC2_pred, RFC2_features = random_forest_classifier(Xtr12, Xte12, ytr12, yte12)
+    # RFC5_accuracy, RFC5_pred, RFC5_features = random_forest_classifier(Xtr15, Xte15, ytr15, yte15)
+    # RFC10_accuracy, RFC10_pred, RFC10_features = random_forest_classifier(Xtr110, Xte110, ytr110, yte110)
+    # RFC15_accuracy, RFC15_pred, RFC15_features = random_forest_classifier(Xtr115, Xte115, ytr115, yte115)
+    # RFC5pred_accuracy, RFC5pred_pred, RFC5pred_features = random_forest_classifier(X1_train5, X1_test5, y1_train5, y1_test5)
+    # RFC10pred_accuracy, RFC10pred_pred, RFC10pred_features = random_forest_classifier(X1_train10, X1_test10, y1_train10, y1_test10)
+    # RFC15pred_accuracy, RFC15pred_pred, RFC15pred_features = random_forest_classifier(X1_train15, X1_test15, y1_train15, y1_test15)
+    #
+    # # Random Forest Regressor results
+    # RFR2_pred, RFR2_accuracy, RFR2_features = random_forest_regressor(Xtr22, Xte22, ytr22, yte12)
+    # RFR5_pred, RFR5_accuracy, RFR5_features = random_forest_regressor(Xtr25, Xte25, ytr25, yte15)
+    # RFR10_pred, RFR10_accuracy, RFR10_features = random_forest_regressor(Xtr210, Xte210, ytr210, yte110)
+    # RFR15_pred, RFR15_accuracy, RFR15_features = random_forest_regressor(Xtr215, Xte215, ytr215, yte115)
+    # RFR5pred_pred, RFR5pred_accuracy, RFR5pred_features = random_forest_regressor(X2_train5, X2_test5, y2_train5, y1_test5)
+    # RFR10pred_pred, RFR10pred_accuracy, RFR10pred_features = random_forest_regressor(X2_train10, X2_test10, y2_train10, y1_test10)
+    # RFR15pred_pred, RFR15pred_accuracy, RFR15pred_features = random_forest_regressor(X2_train15, X2_test15, y2_train15, y1_test15)
+    #
+    # # XG Boost results
+    # XGB2_preds, XGB2_accuracy = xgboost(Xtr12, Xte12, ytr12, yte12)
+    # XGB5_preds, XGB5_accuracy = xgboost(Xtr15, Xte15, ytr15, yte15)
+    # XGB10_preds, XGB10_accuracy = xgboost(Xtr110, Xte110, ytr110, yte110)
+    # XGB15_preds, XGB15_accuracy = xgboost(Xtr115, Xte115, ytr115, yte115)
+    # XGB5pred_preds, XGB5pred_accuracy = xgboost(X1_train5, X1_test5, y1_train5, y1_test5)
+    # XGB10pred_preds, XGB10pred_accuracy = xgboost(X1_train10, X1_test10, y1_train10, y1_test10)
+    # XGB15pred_preds, XGB15pred_accuracy = xgboost(X1_train15, X1_test15, y1_train15, y1_test15)
+    #
+    # # XG Boost Regressor results
+    # XGBr2_preds, XGBr2_accuracy = xgboost_reg(Xtr22, Xte22, ytr22, yte12)
+    # XGBr5_preds, XGBr5_accuracy = xgboost_reg(Xtr25, Xte25, ytr25, yte15)
+    # XGBr10_preds, XGBr10_accuracy = xgboost_reg(Xtr210, Xte210, ytr210, yte110)
+    # XGBr15_preds, XGBr15_accuracy = xgboost_reg(Xtr215, Xte215, ytr215, yte115)
+    # XGBr5pred_preds, XGBr5pred_accuracy = xgboost_reg(X2_train5, X2_test5, y2_train5, y1_test5)
+    # XGBr10pred_preds, XGBr10pred_accuracy = xgboost_reg(X2_train10, X2_test10, y2_train10, y1_test10)
+    # XGBr15pred_preds, XGBr15pred_accuracy = xgboost_reg(X2_train15, X2_test15, y2_train15, y1_test15)
+    #
+    # # MLP results
+    # MLP2_preds, MLP2_accuracy = mlp(Xtr12, Xte12, ytr12, yte12)
+    # MLP5_preds, MLP5_accuracy = mlp(Xtr15, Xte15, ytr15, yte15)
+    # MLP10_preds, MLP10_accuracy = mlp(Xtr110, Xte110, ytr110, yte110)
+    # MLP15_preds, MLP15_accuracy = mlp(Xtr115, Xte115, ytr115, yte115)
+    # MLP5pred_preds, MLP5pred_accuracy = mlp(X1_train5, X1_test5, y1_train5, y1_test5)
+    # MLP10pred_preds, MLP10pred_accuracy = mlp(X1_train10, X1_test10, y1_train10, y1_test10)
+    # MLP15pred_preds, MLP15pred_accuracy = mlp(X1_train15, X1_test15, y1_train15, y1_test15)
+    #
+    # # Gradient Boosting Classifier results
+    # GBC2_preds, GBC2_accuracy = gbc(Xtr12, Xte12, ytr12, yte12)
+    # GBC5_preds, GBC5_accuracy = gbc(Xtr15, Xte15, ytr15, yte15)
+    # GBC10_preds, GBC10_accuracy = gbc(Xtr110, Xte110, ytr110, yte110)
+    # GBC15_preds, GBC15_accuracy = gbc(Xtr115, Xte115, ytr115, yte115)
+    # GBC5pred_preds, GBC5pred_accuracy = gbc(X1_train5, X1_test5, y1_train5, y1_test5)
+    # GBC10pred_preds, GBC10pred_accuracy = gbc(X1_train10, X1_test10, y1_train10, y1_test10)
+    # GBC15pred_preds, GBC15pred_accuracy = gbc(X1_train15, X1_test15, y1_train15, y1_test15)
+    #
+    # print 'LogReg15_accuracy'
+    # print LogReg15_accuracy
+    # print 'SGD2_accuracy'
+    # print SGD2_accuracy
+    # print 'RFR10_accuracy'
+    # print RFR10_accuracy
+    # print 'LogReg10pred_accuracy'
+    # print LogReg10pred_accuracy
+    # print 'LogReg15pred_accuracy'
+    # print LogReg10pred_accuracy
+    # print 'Lasso10_accuracy'
+    # print Lasso10_accuracy
+    # print 'Lasso15_accuracy'
+    # print Lasso15_accuracy
+    # print 'Ridge10_accuracy'
+    # print Ridge10_accuracy
+    # print 'Ridge15_accuracy'
+    # print Ridge15_accuracy
+    # print 'LR10_accuracy'
+    # print LR10_accuracy
+    # print 'LR15_accuracy'
+    # print LR15_accuracy
+    # print 'RFR10pred_accuracy'
+    # print RFR10pred_accuracy
+    # print 'XGBr10_accuracy'
+    # print XGBr10_accuracy
+    # print 'MLP5pred_accuracy'
+    # print MLP5pred_accuracy
