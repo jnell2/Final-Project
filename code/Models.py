@@ -10,11 +10,6 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, Grad
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.cross_validation import KFold
-import copy
-try:
-    from sklearn.model_selection import train_test_split
-except:
-    from sklearn.cross_validation import train_test_split
 
 def proportion_data(df_final):
     '''
@@ -67,31 +62,24 @@ def make_train_test(df_final):
     # X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y1, test_size = 0.3, random_state = 2)
     # X_train2, X_test2, y_train2, y_test2 = train_test_split(X, y2, test_size = 0.3, random_state = 2)
 
-    Xtrain = []
-    Xtest = []
-    ytrain1 = []
-    ytest1 = []
-    ytrain2 = []
-    ytest2 = []
+    X_train = []
+    X_test = []
+    y_train1 = []
+    y_test1 = []
+    y_train2 = []
+    y_test2 = []
 
-    kf = KFold(len(X), n_folds = 5)
+    kf = KFold(len(X), n_folds = 5, shuffle = True)
     for train_index, test_index in kf:
         X_train1, X_test1 = [X[i] for i in train_index], [X[j] for j in test_index]
-        Xtrain.append(X_train1)
-        Xtest.append(X_test1)
+        X_train.append(X_train1)
+        X_test.append(X_test1)
         y_train1, y_test1 = [y1[i] for i in train_index], [y1[j] for j in test_index]
-        ytrain1.append(y_train1)
-        ytest1.append(y_test1)
+        y_train1.append(y_train1)
+        y_test1.append(y_test1)
         y_train2, y_test2 = [y2[i] for i in train_index], [y2[j] for j in test_index]
-        ytrain2.append(y_train2)
-        ytest2.append(y_test2)
-
-    X_train = np.average(Xtrain)
-    X_test = np.average(Xtest)
-    y_train1 = np.average(ytrain1)
-    y_train2 = np.average(ytrain2)
-    y_test1 = np.average(ytest1)
-    y_test2 = np.average(ytest2)
+        y_train2.append(y_train2)
+        y_test2.append(y_test2)
 
     return X_train, X_test, y_train1, y_test1, y_train2, y_test2
 
@@ -103,7 +91,7 @@ def drop_variables(df_final):
 
     return df_final
 
-def logistic(X_train, X_test, y_train, y_test):
+def logistic2(X_train, X_test, y_train, y_test):
     '''
     pass in the 4 TTS outputs
     will return accuracy, y predicted values, and rmse
@@ -120,6 +108,23 @@ def logistic(X_train, X_test, y_train, y_test):
     accuracy = np.average(accuracies)
 
     return accuracy, y_predict
+
+def logistic(X_train, X_test, y_train, y_test):
+    '''
+    pass in the 4 TTS outputs
+    will return accuracy, y predicted values, and rmse
+    only use this for predicting home team W/L (variable 1 listed below)
+    '''
+    accuracies = []
+    for i in range(0, 5):
+        model = LogisticRegression()
+        LR_model = model.fit(X_train[i], y_train[i])
+        y_predict = model.predict(X_test[i])
+        y_true = y_test[i]
+        accuracies.append(accuracy_score(y_true, y_predict))
+    accuracy = np.average(accuracies)
+
+    return accuracy
 
 def lasso(X_train, X_test, y_train, y_test2):
     '''
@@ -303,14 +308,17 @@ if __name__ == '__main__':
     # 1) home team W/L
     # 2) spread
 
+    # Each of the following results is a list of TTS arrays
+    # Future steps will index into the list to run a model for each element of the array
+    # then take an average of the accuracy scores for each model.
     # get train_test_split for 2 games
-    Xtr12, Xte12, ytr12, yte12, ytr22, yte22 = make_train_test(df_final2)
+    X_train2, X_test2, y1_train2, y1_test2, y2_train2, y2_test2 = make_train_test(df_final2)
     # get train_test_split for 5 games
-    Xtr15, Xte15, ytr15, yte15, ytr25, yte25 = make_train_test(df_final5)
+    X_train5, X_test5, y1_train5, y1_test5, y2_train5, y2_test5 = make_train_test(df_final5)
     # get train_test_split for 10 games
-    Xtr110, Xte110, ytr110, yte110, ytr210, yte210 = make_train_test(df_final10)
+    X_train10, X_test10, y1_train10, y1_test10, y2_train10, y2_test10 = make_train_test(df_final10)
     # get train_test_split for 15 games
-    Xtr115, Xte115, ytr115, yte115, ytr215, yte215 = make_train_test(df_final15)
+    X_train15, X_test15, y1_train15, y1_test15, y2_train15, y2_test15 = make_train_test(df_final15)
 
     # get train_test_split for 5 games, proportion_data
     X1_train5, X1_test5, y1_train5, y1_test5, y2_train5, y2_test5 = make_train_test(df_final5_prop)
@@ -320,13 +328,15 @@ if __name__ == '__main__':
     X1_train15, X1_test15, y1_train15, y1_test15, y2_train15, y2_test15 = make_train_test(df_final15_prop)
 
     # Logistic Regression results
-    LogReg2_accuracy, LogReg2_predict = logistic(Xtr12, Xte12, ytr12, yte12)
-    LogReg5_accuracy, LogReg5_predict = logistic(Xtr15, Xte15, ytr15, yte15)
-    LogReg10_accuracy, LogReg10_predict = logistic(Xtr110, Xte110, ytr110, yte110)
-    LogReg15_accuracy, LogReg15_predict = logistic(Xtr115, Xte115, ytr115, yte115)
-    LogReg5pred_accuracy, LogReg5pred_predict = logistic(X1_train5, X1_test5, y1_train5, y1_test5)
-    LogReg10pred_accuracy, LogReg10pred_predict = logistic(X1_train10, X1_test10, y1_train10, y1_test10)
-    LogReg15pred_accuracy, LogReg15pred_predict = logistic(X1_train15, X1_test15, y1_train15, y1_test15)
+
+
+    LogReg2_accuracy = logistic(X_train2, X_test2, y1_train2, y1_test2)
+    # LogReg5_accuracy, LogReg5_predict = logistic(Xtr15, Xte15, ytr15, yte15)
+    # LogReg10_accuracy, LogReg10_predict = logistic(Xtr110, Xte110, ytr110, yte110)
+    # LogReg15_accuracy, LogReg15_predict = logistic(Xtr115, Xte115, ytr115, yte115)
+    # LogReg5pred_accuracy, LogReg5pred_predict = logistic(X1_train5, X1_test5, y1_train5, y1_test5)
+    # LogReg10pred_accuracy, LogReg10pred_predict = logistic(X1_train10, X1_test10, y1_train10, y1_test10)
+    # LogReg15pred_accuracy, LogReg15pred_predict = logistic(X1_train15, X1_test15, y1_train15, y1_test15)
 
     # # Linear Regression results
     # # Lasso

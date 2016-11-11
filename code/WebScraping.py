@@ -79,43 +79,6 @@ def Date_Shots(soup):
     df = pd.DataFrame(mat,columns = cols)
     return df
 
-# def Season_TS(soup):
-#     '''
-#     pass in html output from BeautifulSoup
-#     will return a pandas dataframe
-#     this gets us the df for the season-by-season team summary
-#     '''
-#     full_table = soup.find("table", {"class": "stat-table"})
-#     cols = ['rank', 'team', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
-#     'ROW', 'point%', 'GF', 'GA', 'GF/GP', 'GA/GP', 'PP%','PK%', 'SF/GP', \
-#     'SA/GP', 'FOW%']
-#     mat = np.ndarray((0,20))
-#     lst = soup.find_all('tr', attrs = {'class': 'standard-row'})
-#     for i in lst:
-#         row = [elem.text for elem in i.find_all('td')]
-#         mat = np.vstack((mat, row))
-#     df = pd.DataFrame(mat,columns = cols)
-#     return df
-#     # can get standings from this table, as it is sorted by points, wins
-#
-# def Season_Shots(soup):
-#     '''
-#     pass in html output from BeautifulSoup
-#     will return a pandas dataframe
-#     this gets us the df for the season-by-season shots report
-#     '''
-#     full_table = soup.find("table", {"class": "stat-table"})
-#     cols = ['#', 'team', 'season', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
-#     'hits', 'blocked_shots', 'missed_shots', 'giveaways', 'takeaways', 'FOW', \
-#     'FOL', 'FO', 'FOW%', 'SF', 'GF', 'save%']
-#     mat = np.ndarray((0,21))
-#     lst = soup.find_all('tr', attrs = {'class': 'standard-row'})
-#     for i in lst:
-#         row = [elem.text for elem in i.find_all('td')]
-#         mat = np.vstack((mat, row))
-#     df = pd.DataFrame(mat,columns = cols)
-#     return df
-
 def Date_TS_loop(url, num_pages):
     '''
     pass in url and number of pages that are in the table (found below the table at the URL)
@@ -192,43 +155,22 @@ def get_data():
 
     date1 = '2016-10-12' # start date of current season
     date2 = datetime.date.today().strftime('%Y-%m-%d') # in format YYYY-MM-DD, this is the current date
-    # d = datetime.datetime.strptime(date2, "%Y-%m-%d")
-    # date1 = (d - dateutil.relativedelta.relativedelta(months=2)).strftime('%Y-%m-%d') #in format YYYY-MM-DD, this is 2 months before todays date
-
-    current_year = datetime.date.today().year # in format YYYY
-    prior_year = current_year - 1
-    prior_2year = current_year - 2
-    next_year = current_year + 1
-
-    if datetime.date.today().month >= 9:
-        season = str(current_year) + str(next_year)
-        past_season = str(prior_year) + str(current_year)
-    else:
-        season = str(prior_year) + str(current_year)
-        past_season = str(prior_2year) + str(prior_year)
 
     Date_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=wins,points'.format(date1, date2)
     Date_Penalties_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=penalties&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=penaltyMinutes'.format(date1, date2)
     Date_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=hits'.format(date1, date2)
-    # Season_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(season, season)
-    # Season_TeamSummary_past_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=points,wins,gamesPlayed'.format(past_season, past_season)
-    # Season_Shots_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=realtime&reportType=season&seasonFrom={}&seasonTo={}&filter=gamesPlayed,gte,&sort=hits'.format(season, season)
 
-    soup = get_soup(Date_TeamSummary_url, page = 1)
-    pages = soup.find('select', attrs = {'class': 'pager-select'})
-    num_pages = int(pages.text[-1])
+    # soup = get_soup(Date_TeamSummary_url, page = 1)
+    # pages = soup.find('select', attrs = {'class': 'pager-select'})
+    # num_pages = int(pages.text[-1])
 
-    df_dts = Date_TS_loop(Date_TeamSummary_url, num_pages)
-    df_dp = Date_Penalties_loop(Date_Penalties_url, num_pages)
-    df_ds = Date_Shots_loop(Date_Shots_url, num_pages)
+    # df_dts = Date_TS_loop(Date_TeamSummary_url, num_pages)
+    # df_dp = Date_Penalties_loop(Date_Penalties_url, num_pages)
+    # df_ds = Date_Shots_loop(Date_Shots_url, num_pages)
 
-    # soup_sts = get_soup(Season_TeamSummary_url, page=1)
-    # df_sts = Season_TS(soup_sts)
-    # soup_sts_past = get_soup(Season_TeamSummary_past_url, page=1)
-    # df_sts_past = Season_TS(soup_sts_past)
-    #
-    # soup_ss = get_soup(Season_Shots_url, page=1)
-    # df_ss = Season_Shots(soup_ss)
+    df_dts = Date_TS_loop(Date_TeamSummary_url, 9)
+    df_dp = Date_Penalties_loop(Date_Penalties_url, 9)
+    df_ds = Date_Shots_loop(Date_Shots_url, 9)
 
     return df_dts, df_dp, df_ds
 

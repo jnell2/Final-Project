@@ -261,6 +261,78 @@ def cumulative_stats(df_all, df_games, n = 10):
 
     return final
 
+def cumulative_statsLS(df_all, df_games, n = 10):
+    '''
+    pass in df_all and df_games from GbG_cumulative_df above
+    will return final dataframe
+    '''
+    df_home = pd.DataFrame()
+
+    for row in df_games.iterrows():
+        # ONLY looking at games from 10/16 on
+        if row[1].date >= pd.to_datetime('2015-10-18'):
+            df = df_all[(df_all['team'] == row[1].home_team) & (df_all['date'] < row[1].date)]
+            df.sort_values('date', ascending = False, inplace = True)
+            sample = df.head(n)
+            sample = sample.mean()
+            sample = sample.to_frame()
+            sample = sample.T
+            sample.drop(['home_ind'], axis = 1, inplace = True)
+            sample.columns = ['home_spread', 'home_wins', 'home_goals', 'home_shots', \
+            'home_PP%', 'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', \
+            'home_giveaways', 'home_takeaways', 'home_save%', 'home_shot%', \
+            'home_PDO', 'home_corsi']
+            df_home = df_home.append(sample)
+            df_home.reset_index(drop=True, inplace = True)
+        else:
+            sample = np.zeros(15)
+            sample = pd.DataFrame(sample)
+            sample = sample.T
+            sample.columns = \
+            ['home_spread', 'home_wins', 'home_goals', 'home_shots', \
+            'home_PP%', 'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', \
+            'home_giveaways', 'home_takeaways', 'home_save%', 'home_shot%', \
+            'home_PDO', 'home_corsi']
+            df_home = df_home.append(sample)
+            df_home.reset_index(drop = True, inplace = True)
+
+    df_away = pd.DataFrame()
+
+    for row in df_games.iterrows():
+        # ONLY looking at games from 10/16 on
+        if row[1].date >= pd.to_datetime('2015-10-18'):
+            df = df_all[(df_all['team'] == row[1].away_team) & (df_all['date'] < row[1].date)]
+            df.sort('date', ascending = False, inplace = True)
+            sample = df.head(n)
+            sample = sample.mean()
+            sample = sample.to_frame()
+            sample = sample.T
+            sample.drop(['home_ind'], axis = 1, inplace = True)
+            sample.columns = ['away_spread', 'away_wins', 'away_goals', 'away_shots', \
+            'away_PP%', 'away_FOW%', 'away_PIM', 'away_hits', 'away_blocked', \
+            'away_giveaways', 'away_takeaways', 'away_save%', 'away_shot%', \
+            'away_PDO', 'away_corsi']
+            df_away = df_away.append(sample)
+            df_away.reset_index(drop=True, inplace = True)
+        else:
+            sample = np.zeros(15)
+            sample = pd.DataFrame(sample)
+            sample = sample.T
+            sample.columns = \
+            ['away_spread', 'away_wins', 'away_goals', 'away_shots', \
+            'away_PP%', 'away_FOW%', 'away_PIM', 'away_hits', 'away_blocked', \
+            'away_giveaways', 'away_takeaways', 'away_save%', 'away_shot%', \
+            'away_PDO', 'away_corsi']
+            df_away = df_away.append(sample)
+            df_away.reset_index(drop = True, inplace = True)
+
+        total = pd.merge(df_games, df_home, how = 'left', left_index = True, right_index = True)
+        total = pd.merge(total, df_away, how = 'left', left_index = True, right_index = True)
+        final = total[total['date'] >= pd.to_datetime('2015-10-18')]
+        final.reset_index(drop = True, inplace = True)
+
+    return final
+
 if __name__ == '__main__':
 
     # df_dts, df_dp, df_ds = ws.get_data()
@@ -281,16 +353,35 @@ if __name__ == '__main__':
     df_ds = df_ds[['team', 'opponent', 'date', 'hits', 'blocked_shots', \
     'giveaways', 'takeaways', 'save%']]
 
+    df_dtsLS = pd.read_csv('data/dtsLS.csv')
+    df_dtsLS = df_dtsLS[['team', 'opponent', 'date', 'home_ind', 'W', 'L', \
+    'GF', 'GA', 'SF', 'SA', 'PP%', 'PK%', 'FOW%']]
+    df_dpLS = pd.read_csv('data/dpLS.csv')
+    df_dpLS = df_dpLS[['team', 'opponent', 'date', 'PIM', 'penalties']]
+    df_dsLS = pd.read_csv('data/dsLS.csv')
+    df_dsLS = df_dsLS[['team', 'opponent', 'date', 'hits', 'blocked_shots', \
+    'giveaways', 'takeaways', 'save%']]
+
     df_games = make_GbG_df(df_dts, df_dp, df_ds)
+    df_gamesLS = make_GbG_df(df_dtsLS, df_dpLS, df_dsLS)
     df_all, df_games = GbG_cumulative_df(df_games)
+    df_allLS, df_gamesLS = GbG_cumulative_df(df_gamesLS)
     # df_all is the standard template, will add all cumulative stats to this
-
+    #
     final2 = cumulative_stats(df_all, df_games, 2)
+    final2LS = cumulative_statsLS(df_allLS, df_gamesLS, 2)
     final5 = cumulative_stats(df_all, df_games, 5)
+    final5LS = cumulative_statsLS(df_allLS, df_gamesLS, 5)
     final10 = cumulative_stats(df_all, df_games, 10)
+    final10LS = cumulative_statsLS(df_allLS, df_gamesLS, 10)
     final15 = cumulative_stats(df_all, df_games, 15)
+    final15LS = cumulative_statsLS(df_allLS, df_gamesLS, 15)
 
-    final2.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final2.csv')
-    final5.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final5.csv')
-    final10.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final10.csv')
-    final15.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final15.csv')
+    final2.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal2.csv')
+    final5.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal5.csv')
+    final10.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal10.csv')
+    final15.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal15.csv')
+    final2LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal2LS.csv')
+    final5LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal5LS.csv')
+    final10LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal10LS.csv')
+    final15LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal15LS.csv')
