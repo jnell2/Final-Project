@@ -135,3 +135,10 @@ Presentation outline
 
 will do grid search on 5 above models.
 ** need to see what accuracy does with and without predictors
+
+best model: RFR, 10 games
+without:
+- shots, save%, shot% = 66% accuracy
+- shots, shot% = 66% accuracy
+- shots, save%, PDO = 66% accuracy
+- shots, shot%, PDO = 66% accuracy

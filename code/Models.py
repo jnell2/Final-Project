@@ -67,6 +67,14 @@ def make_train_test(df_final):
 
     return X_train1, X_test1, y_train1, y_test1, X_train2, X_test2, y_train2, y_test2
 
+def drop_variables(df_final):
+    '''
+    drop variables to test accuracies
+    '''
+    df_final.drop(['home_shots', 'away_shots', 'home_shot%', 'away_shot%', 'home_blocked', 'away_blocked'], axis = 1, inplace = True)
+
+    return df_final
+
 def logistic(X_train, X_test, y_train, y_test):
     '''
     pass in the 4 TTS outputs
@@ -243,19 +251,25 @@ if __name__ == '__main__':
     # this gets the most recent final csv files
     # if you want up-to-date information, re-run DataCleaning.py
     df_final2 = pd.read_csv('data/final2.csv')
-    df_final2.drop('Unnamed: 0', axis = 1, inplace = True)
+    df_final2.drop(['Unnamed: 0'], axis = 1, inplace = True)
     df_final5 = pd.read_csv('data/final5.csv')
-    df_final5.drop('Unnamed: 0', axis = 1, inplace = True)
+    df_final5.drop(['Unnamed: 0'], axis = 1, inplace = True)
     df_final10 = pd.read_csv('data/final10.csv')
-    df_final10.drop('Unnamed: 0', axis = 1, inplace = True)
+    df_final10.drop(['Unnamed: 0'], axis = 1, inplace = True)
     df_final15 = pd.read_csv('data/final15.csv')
-    df_final15.drop('Unnamed: 0', axis = 1, inplace = True)
+    df_final15.drop(['Unnamed: 0'], axis = 1, inplace = True)
 
     # making new dataframes for 10, 15 games with proportion data
     # only doing this for 5, 10, and 15 games because those seem to perform the best
     df_final5_prop = proportion_data(df_final5)
     df_final10_prop = proportion_data(df_final10)
     df_final15_prop = proportion_data(df_final15)
+
+    # drop variables
+    df_final2 = drop_variables(df_final2)
+    df_final5 = drop_variables(df_final5)
+    df_final10 = drop_variables(df_final10)
+    df_final15 = drop_variables(df_final15)
 
     # the goal is to predict 2 variables:
     # 1) home team W/L
@@ -381,3 +395,32 @@ if __name__ == '__main__':
     GBC5pred_preds, GBC5pred_accuracy = gbc(X1_train5, X1_test5, y1_train5, y1_test5)
     GBC10pred_preds, GBC10pred_accuracy = gbc(X1_train10, X1_test10, y1_train10, y1_test10)
     GBC15pred_preds, GBC15pred_accuracy = gbc(X1_train15, X1_test15, y1_train15, y1_test15)
+
+    print 'LogReg15_accuracy'
+    print LogReg15_accuracy
+    print 'SGD2_accuracy'
+    print SGD2_accuracy
+    print 'RFR10_accuracy'
+    print RFR10_accuracy
+    print 'LogReg10pred_accuracy'
+    print LogReg10pred_accuracy
+    print 'LogReg15pred_accuracy'
+    print LogReg10pred_accuracy
+    print 'Lasso10_accuracy'
+    print Lasso10_accuracy
+    print 'Lasso15_accuracy'
+    print Lasso15_accuracy
+    print 'Ridge10_accuracy'
+    print Ridge10_accuracy
+    print 'Ridge15_accuracy'
+    print Ridge15_accuracy
+    print 'LR10_accuracy'
+    print LR10_accuracy
+    print 'LR15_accuracy'
+    print LR15_accuracy
+    print 'RFR10pred_accuracy'
+    print RFR10pred_accuracy
+    print 'XGBr10_accuracy'
+    print XGBr10_accuracy
+    print 'MLP5pred_accuracy'
+    print MLP5pred_accuracy
