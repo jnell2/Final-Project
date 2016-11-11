@@ -266,10 +266,10 @@ if __name__ == '__main__':
     df_final15_prop = proportion_data(df_final15)
 
     # drop variables
-    df_final2 = drop_variables(df_final2)
-    df_final5 = drop_variables(df_final5)
-    df_final10 = drop_variables(df_final10)
-    df_final15 = drop_variables(df_final15)
+    # df_final2 = drop_variables(df_final2)
+    # df_final5 = drop_variables(df_final5)
+    # df_final10 = drop_variables(df_final10)
+    # df_final15 = drop_variables(df_final15)
 
     # the goal is to predict 2 variables:
     # 1) home team W/L
