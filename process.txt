@@ -133,4 +133,5 @@ Presentation outline
 4) RF classifier, 15 games (accuracy = 60.0%)
 5) logistic, 15 games (accuracy = 60.0%)
 
-will do grid search on 5 above models. 
+will do grid search on 5 above models.
+** need to see what accuracy does with and without predictors

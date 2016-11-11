@@ -2,12 +2,11 @@ import pandas as pd
 import numpy as np
 from math import sqrt
 import xgboost as xgb
-import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.linear_model import LinearRegression, ElasticNet, Lasso, Ridge, SGDRegressor
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier, MLPRegressor
 try:
@@ -67,23 +66,6 @@ def make_train_test(df_final):
     X_train2, X_test2, y_train2, y_test2 = train_test_split(X, y2, test_size = 0.3, random_state = 2)
 
     return X_train1, X_test1, y_train1, y_test1, X_train2, X_test2, y_train2, y_test2
-
-def get_X_y(df_final):
-    '''
-    import final dataframe from DataCleaning that you want to TTS
-    will return X, y matrices that will be split by TTS and column names
-    '''
-    df = df_final.copy()
-    y1 = df.pop('home_team_win')
-    # variable 1 to predict
-    y2 = df.pop('spread')
-    # variable 2 to predict
-    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
-    # we don't want any categorical variables in the model
-    X = df.values
-    columns = df.columns
-
-    return X, y1, y2, columns
 
 def logistic(X_train, X_test, y_train, y_test):
     '''
@@ -231,7 +213,7 @@ def xgboost_reg(X_train, X_test, y_train, y_test2):
 def mlp(X_train, X_test, y_train, y_test):
     '''
     pass in the 4 TTS
-    will return predictions, rmse, and accuracy
+    will return predictions and accuracy
     '''
     scaler = StandardScaler()
     scaler.fit(X_train)
@@ -243,6 +225,18 @@ def mlp(X_train, X_test, y_train, y_test):
     accuracy = accuracy_score(y_test, predictions)
 
     return predictions, accuracy
+
+def gbc(X_train, X_test, y_train, y_test):
+    '''
+    pass in the 4 TTS
+    will return predictions and accuracy
+    '''
+    model = GradientBoostingClassifier()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+
+    return y_pred, accuracy
 
 if __name__ == '__main__':
 
@@ -282,15 +276,6 @@ if __name__ == '__main__':
     X1_train10, X1_test10, y1_train10, y1_test10, X2_train10, X2_test10, y2_train10, y2_test10 = make_train_test(df_final10_prop)
     # get train_test_split for 15 games, proportion_data
     X1_train15, X1_test15, y1_train15, y1_test15, X2_train15, X2_test15, y2_train15, y2_test15 = make_train_test(df_final15_prop)
-
-    # get X, y matrices for 2 games
-    X_2, y1_2, y2_2, columns2 = get_X_y(df_final2)
-    # get X, y matrices for 5 games
-    X_5, y1_5, y2_5, columns5 = get_X_y(df_final5)
-    # get X, y matrices for 10 games
-    X_10, y1_10, y2_10, column10 = get_X_y(df_final10)
-    # get X, y matrices for 15 games
-    X_15, y1_15, y2_15, column15 = get_X_y(df_final15)
 
     # Logistic Regression results
     LogReg2_accuracy, LogReg2_predict = logistic(Xtr12, Xte12, ytr12, yte12)
@@ -387,3 +372,12 @@ if __name__ == '__main__':
     MLP5pred_preds, MLP5pred_accuracy = mlp(X1_train5, X1_test5, y1_train5, y1_test5)
     MLP10pred_preds, MLP10pred_accuracy = mlp(X1_train10, X1_test10, y1_train10, y1_test10)
     MLP15pred_preds, MLP15pred_accuracy = mlp(X1_train15, X1_test15, y1_train15, y1_test15)
+
+    # Gradient Boosting Classifier results
+    GBC2_preds, GBC2_accuracy = gbc(Xtr12, Xte12, ytr12, yte12)
+    GBC5_preds, GBC5_accuracy = gbc(Xtr15, Xte15, ytr15, yte15)
+    GBC10_preds, GBC10_accuracy = gbc(Xtr110, Xte110, ytr110, yte110)
+    GBC15_preds, GBC15_accuracy = gbc(Xtr115, Xte115, ytr115, yte115)
+    GBC5pred_preds, GBC5pred_accuracy = gbc(X1_train5, X1_test5, y1_train5, y1_test5)
+    GBC10pred_preds, GBC10pred_accuracy = gbc(X1_train10, X1_test10, y1_train10, y1_test10)
+    GBC15pred_preds, GBC15pred_accuracy = gbc(X1_train15, X1_test15, y1_train15, y1_test15)
