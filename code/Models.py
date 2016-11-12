@@ -69,7 +69,7 @@ def make_train_test(df_final):
     y_train2 = []
     y_test2 = []
 
-    kf = KFold(len(X), n_folds = 5, shuffle = True)
+    kf = KFold(len(X), n_folds = 5, shuffle = True, random_state = 2)
     for train_index, test_index in kf:
         X_train1, X_test1 = [X[i] for i in train_index], [X[j] for j in test_index]
         X_train.append(X_train1)
@@ -91,15 +91,13 @@ def drop_variables(df_final):
 
     return df_final
 
-def logistic2(X_train, X_test, y_train, y_test):
+def logistic(X_train, X_test, y_train, y_test):
     '''
     pass in the 4 TTS outputs
     will return accuracy, y predicted values, and rmse
     only use this for predicting home team W/L (variable 1 listed below)
     '''
     accuracies = []
-    precisions = []
-    recalls = []
     model = LogisticRegression()
     LR_model = model.fit(X_train, y_train)
     y_predict = model.predict(X_test)
@@ -109,7 +107,7 @@ def logistic2(X_train, X_test, y_train, y_test):
 
     return accuracy, y_predict
 
-def logistic(X_train, X_test, y_train, y_test):
+def logistic_k(X_train, X_test, y_train, y_test):
     '''
     pass in the 4 TTS outputs
     will return accuracy, y predicted values, and rmse
@@ -279,6 +277,28 @@ def gbc(X_train, X_test, y_train, y_test):
 
     return y_pred, accuracy
 
+def kfold_logistic(df_final):
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    logistic = LogisticRegression()
+    for train, test in kf:
+        logistic.fit(X[train], y1[train])
+        pred = logistic.predict(X[test])
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return accuracy, np.mean(accuracy)
+
 if __name__ == '__main__':
 
     # this gets the most recent final csv files
@@ -327,10 +347,13 @@ if __name__ == '__main__':
     # get train_test_split for 15 games, proportion_data
     X1_train15, X1_test15, y1_train15, y1_test15, y2_train15, y2_test15 = make_train_test(df_final15_prop)
 
+    accuracy2, logistic2_accuracy = kfold_logistic(df_final2)
+    accuracy5, logistic5_accuracy = kfold_logistic(df_final5)
+    accuracy10, logistic10_accuracy = kfold_logistic(df_final10)
+    accuracy15, logistic15_accuracy = kfold_logistic(df_final15)
+
     # Logistic Regression results
-
-
-    LogReg2_accuracy = logistic(X_train2, X_test2, y1_train2, y1_test2)
+    # LogReg2_accuracy = logistic(X_train2, X_test2, y1_train2, y1_test2)
     # LogReg5_accuracy, LogReg5_predict = logistic(Xtr15, Xte15, ytr15, yte15)
     # LogReg10_accuracy, LogReg10_predict = logistic(Xtr110, Xte110, ytr110, yte110)
     # LogReg15_accuracy, LogReg15_predict = logistic(Xtr115, Xte115, ytr115, yte115)
