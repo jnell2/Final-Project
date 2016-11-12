@@ -335,13 +335,13 @@ def cumulative_statsLS(df_all, df_games, n = 10):
 
 if __name__ == '__main__':
 
-    # df_dts, df_dp, df_ds = ws.get_data()
-    #
-    # dts, dp, ds = get_clean_data(df_dts, df_dp, df_ds)
-    #
-    # dts.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/dts.csv')
-    # dp.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/dp.csv')
-    # ds.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/ds.csv')
+    df_dts, df_dp, df_ds = ws.get_data()
+
+    dts, dp, ds = get_clean_data(df_dts, df_dp, df_ds)
+
+    dts.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/dts.csv')
+    dp.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/dp.csv')
+    ds.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/ds.csv')
 
     # cleaning up dataframes
     df_dts = pd.read_csv('data/dts.csv')
@@ -353,35 +353,35 @@ if __name__ == '__main__':
     df_ds = df_ds[['team', 'opponent', 'date', 'hits', 'blocked_shots', \
     'giveaways', 'takeaways', 'save%']]
 
-    df_dtsLS = pd.read_csv('data/dtsLS.csv')
-    df_dtsLS = df_dtsLS[['team', 'opponent', 'date', 'home_ind', 'W', 'L', \
-    'GF', 'GA', 'SF', 'SA', 'PP%', 'PK%', 'FOW%']]
-    df_dpLS = pd.read_csv('data/dpLS.csv')
-    df_dpLS = df_dpLS[['team', 'opponent', 'date', 'PIM', 'penalties']]
-    df_dsLS = pd.read_csv('data/dsLS.csv')
-    df_dsLS = df_dsLS[['team', 'opponent', 'date', 'hits', 'blocked_shots', \
-    'giveaways', 'takeaways', 'save%']]
+    # df_dtsLS = pd.read_csv('data/dtsLS.csv')
+    # df_dtsLS = df_dtsLS[['team', 'opponent', 'date', 'home_ind', 'W', 'L', \
+    # 'GF', 'GA', 'SF', 'SA', 'PP%', 'PK%', 'FOW%']]
+    # df_dpLS = pd.read_csv('data/dpLS.csv')
+    # df_dpLS = df_dpLS[['team', 'opponent', 'date', 'PIM', 'penalties']]
+    # df_dsLS = pd.read_csv('data/dsLS.csv')
+    # df_dsLS = df_dsLS[['team', 'opponent', 'date', 'hits', 'blocked_shots', \
+    # 'giveaways', 'takeaways', 'save%']]
 
     df_games = make_GbG_df(df_dts, df_dp, df_ds)
-    df_gamesLS = make_GbG_df(df_dtsLS, df_dpLS, df_dsLS)
+    # df_gamesLS = make_GbG_df(df_dtsLS, df_dpLS, df_dsLS)
     df_all, df_games = GbG_cumulative_df(df_games)
-    df_allLS, df_gamesLS = GbG_cumulative_df(df_gamesLS)
+    # df_allLS, df_gamesLS = GbG_cumulative_df(df_gamesLS)
     # df_all is the standard template, will add all cumulative stats to this
     #
     final2 = cumulative_stats(df_all, df_games, 2)
-    final2LS = cumulative_statsLS(df_allLS, df_gamesLS, 2)
+    # final2LS = cumulative_statsLS(df_allLS, df_gamesLS, 2)
     final5 = cumulative_stats(df_all, df_games, 5)
-    final5LS = cumulative_statsLS(df_allLS, df_gamesLS, 5)
+    # final5LS = cumulative_statsLS(df_allLS, df_gamesLS, 5)
     final10 = cumulative_stats(df_all, df_games, 10)
-    final10LS = cumulative_statsLS(df_allLS, df_gamesLS, 10)
+    # final10LS = cumulative_statsLS(df_allLS, df_gamesLS, 10)
     final15 = cumulative_stats(df_all, df_games, 15)
-    final15LS = cumulative_statsLS(df_allLS, df_gamesLS, 15)
+    # final15LS = cumulative_statsLS(df_allLS, df_gamesLS, 15)
 
-    final2.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal2.csv')
-    final5.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal5.csv')
-    final10.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal10.csv')
-    final15.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal15.csv')
-    final2LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal2LS.csv')
-    final5LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal5LS.csv')
-    final10LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal10LS.csv')
-    final15LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal15LS.csv')
+    final2.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final2.csv')
+    final5.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final5.csv')
+    final10.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final10.csv')
+    final15.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final15.csv')
+    # final2LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal2LS.csv')
+    # final5LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal5LS.csv')
+    # final10LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal10LS.csv')
+    # final15LS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/LSfinal15LS.csv')

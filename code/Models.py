@@ -43,241 +43,39 @@ def proportion_data(df_final):
 
     return df
 
-def make_train_test(df_final):
-    '''
-    import final dataframe from DataCleaning that you want to TTS
-    will return two sets of train_test_split
-    1) using home team W/L as variable trying to predict
-    2) using spread as variable trying to predict
-    '''
-    df = df_final.copy()
-    y1 = df.pop('home_team_win')
-    # variable 1 to predict
-    y2 = df.pop('spread')
-    # variable 2 to predict
-    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
-    # we don't want any categorical variables in the model
-    X = df.values
-
-    # X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y1, test_size = 0.3, random_state = 2)
-    # X_train2, X_test2, y_train2, y_test2 = train_test_split(X, y2, test_size = 0.3, random_state = 2)
-
-    X_train = []
-    X_test = []
-    y_train1 = []
-    y_test1 = []
-    y_train2 = []
-    y_test2 = []
-
-    kf = KFold(len(X), n_folds = 5, shuffle = True, random_state = 2)
-    for train_index, test_index in kf:
-        X_train1, X_test1 = [X[i] for i in train_index], [X[j] for j in test_index]
-        X_train.append(X_train1)
-        X_test.append(X_test1)
-        y_train1, y_test1 = [y1[i] for i in train_index], [y1[j] for j in test_index]
-        y_train1.append(y_train1)
-        y_test1.append(y_test1)
-        y_train2, y_test2 = [y2[i] for i in train_index], [y2[j] for j in test_index]
-        y_train2.append(y_train2)
-        y_test2.append(y_test2)
-
-    return X_train, X_test, y_train1, y_test1, y_train2, y_test2
-
 def drop_variables(df_final):
     '''
     drop variables to test accuracies
     '''
-    df_final.drop(['home_shots', 'away_shots', 'home_shot%', 'away_shot%', 'home_blocked', 'away_blocked'], axis = 1, inplace = True)
+    # df_final['Hwins2'] = df_final['home_wins'] + df_final['home_wins']
+    # df_final['Awins2'] = df_final['away_wins'] + df_final['away_wins']
+    # df_final['Hgoals2'] = df_final['home_goals'] + df_final['home_goals']
+    # df_final['Agoals2'] = df_final['away_goals'] + df_final['away_goals']
+    # df_final['HFOW%2'] = df_final['home_FOW%'] + df_final['home_FOW%']
+    # df_final['AFOW%2'] = df_final['away_FOW%'] + df_final['away_FOW%']
+    # df_final['Hcorsi2'] = df_final['home_corsi'] + df_final['home_corsi']
+    # df_final['Acorsi2'] = df_final['away_corsi'] + df_final['away_corsi']
+    # df_final['HPIM'] = df_final['home_PIM'] + df_final['home_PIM']
+    # df_final['APIM'] = df_final['away_PIM'] + df_final['away_PIM']
+
+    df_final.drop(['home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
     return df_final
 
-def logistic(X_train, X_test, y_train, y_test):
+def drop_variables_ratio(df_final):
     '''
-    pass in the 4 TTS outputs
-    will return accuracy, y predicted values, and rmse
-    only use this for predicting home team W/L (variable 1 listed below)
+    drop variables to test accuracies
     '''
-    accuracies = []
-    model = LogisticRegression()
-    LR_model = model.fit(X_train, y_train)
-    y_predict = model.predict(X_test)
-    y_true = y_test
-    accuracies.append(accuracy_score(y_true, y_predict))
-    accuracy = np.average(accuracies)
+    df_final.drop(['corsi'], axis = 1, inplace = True)
 
-    return accuracy, y_predict
-
-def logistic_k(X_train, X_test, y_train, y_test):
-    '''
-    pass in the 4 TTS outputs
-    will return accuracy, y predicted values, and rmse
-    only use this for predicting home team W/L (variable 1 listed below)
-    '''
-    accuracies = []
-    for i in range(0, 5):
-        model = LogisticRegression()
-        LR_model = model.fit(X_train[i], y_train[i])
-        y_predict = model.predict(X_test[i])
-        y_true = y_test[i]
-        accuracies.append(accuracy_score(y_true, y_predict))
-    accuracy = np.average(accuracies)
-
-    return accuracy
-
-def lasso(X_train, X_test, y_train, y_test2):
-    '''
-    pass in the 4 TTS outputs, y_test from W/L TTS, not spread TTS
-    will return y predicted values, accuracy
-    only use this for predicting spread, variable 2 listed below (in relation to home team)
-    '''
-    model = Lasso(alpha = 0.00001, fit_intercept = False, normalize = True)
-    model.fit(X_train, y_train)
-    model_pred = model.predict(X_test)
-    model_pred = map(lambda x: 1 if x > 0 else 0, model_pred)
-    model_accuracy = accuracy_score(y_test2, model_pred)
-
-    return model_pred, model_accuracy
-
-def ridge(X_train, X_test, y_train, y_test2):
-    '''
-    pass in the 4 TTS outputs, y_test from W/L TTS, not spread TTS
-    will return y predicted values, accuracy
-    only use this for predicting spread, variable 2 listed below (in relation to home team)
-    '''
-    model = Ridge(alpha = 0.00001, fit_intercept = False, normalize = True)
-    model.fit(X_train, y_train)
-    model_pred = model.predict(X_test)
-    model_pred = map(lambda x: 1 if x > 0 else 0, model_pred)
-    model_accuracy = accuracy_score(y_test2, model_pred)
-
-    return model_pred, model_accuracy
-
-def elastic(X_train, X_test, y_train, y_test2):
-    '''
-    pass in the 4 TTS outputs, y_test from W/L TTS, not spread TTS
-    will return y predicted values, rmse, r2
-    only use this for predicting spread, variable 2 listed below (in relation to home team)
-    '''
-    model = ElasticNet(alpha = 0.00001, fit_intercept = False, normalize = True)
-    model.fit(X_train, y_train)
-    model_pred = model.predict(X_test)
-    model_pred = map(lambda x: 1 if x > 0 else 0, model_pred)
-    model_accuracy = accuracy_score(y_test2, model_pred)
-
-    return model_pred, model_accuracy
-
-def linear(X_train, X_test, y_train, y_test2):
-    '''
-    pass in the 4 TTS outputs, y_test from W/L TTS, not spread TTS
-    will return y predicted values, accuracy
-    only use this for predicting spread, variable 2 listed below (in relation to home team)
-    '''
-    model = LinearRegression(fit_intercept = False, normalize = True, n_jobs = -1)
-    model.fit(X_train, y_train)
-    model_pred = model.predict(X_test)
-    model_pred = map(lambda x: 1 if x > 0 else 0, model_pred)
-    model_accuracy = accuracy_score(y_test2, model_pred)
-
-    return model_pred, model_accuracy
-
-def sgd(X_train, X_test, y_train, y_test2):
-    '''
-    pass in the 4 TTS outputs, y_test from W/L TTS, not spread TTS
-    will return y predicted values, accuracy
-    only use this for predicting spread, variable 2 listed below (in relation to home team)
-    '''
-    model = SGDRegressor(n_iter = 100)
-    model.fit(X_train, y_train)
-    model_pred = model.predict(X_test)
-    model_pred = map(lambda x: 1 if x > 0 else 0, model_pred)
-    model_accuracy = accuracy_score(y_test2, model_pred)
-
-    return model_pred, model_accuracy
-
-def random_forest_classifier(X_train, X_test, y_train, y_test):
-    '''
-    pass in the 4 TTS outputs
-    will return accuracy, y predicted values, and features
-    only use this for predicting home team W/L (variable 1 listed below)
-    '''
-    rf = RandomForestClassifier(random_state = 2)
-    rf.fit(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    accuracy = rf.score(X_test, y_test)
-    features = rf.feature_importances_
-
-    return accuracy, y_pred, features
-
-def random_forest_regressor(X_train, X_test, y_train, y_test2):
-    '''
-    pass in the 4 TTS outputs, y_test from W/L TTS, not spread TTS
-    will return y predicted values, accuracy, and features
-    only use this for predicting spread, variable 2 listed below (in relation to home team)
-    '''
-    rf = RandomForestRegressor(random_state = 2)
-    rf.fit(X_train, y_train)
-    y_pred = rf.predict(X_test)
-    y_pred = map(lambda x: 1 if x > 0 else 0, y_pred)
-    features = rf.feature_importances_
-    accuracy = accuracy_score(y_test2, y_pred)
-
-    return y_pred, accuracy, features
-
-def xgboost(X_train, X_test, y_train, y_test):
-    '''
-    pass in the 4 TTS
-    will return predictions and accuracy
-    '''
-    model = xgb.XGBClassifier()
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    predictions = [round(value) for value in y_pred]
-    accuracy = accuracy_score(y_test, predictions)
-
-    return predictions, accuracy
-
-def xgboost_reg(X_train, X_test, y_train, y_test2):
-    '''
-    pass in the 4 TTS outputs, y_test from W/L TTS, not spread TTS
-    will return predictions and accuracy
-    '''
-    model = xgb.XGBRegressor()
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    y_pred = map(lambda x: 1 if x > 0 else 0, y_pred)
-    accuracy = accuracy_score(y_test2, y_pred)
-
-    return y_pred, accuracy
-
-def mlp(X_train, X_test, y_train, y_test):
-    '''
-    pass in the 4 TTS
-    will return predictions and accuracy
-    '''
-    scaler = StandardScaler()
-    scaler.fit(X_train)
-    X_train = scaler.transform(X_train)
-    X_test = scaler.transform(X_test)
-    clf = MLPClassifier(solver = 'lbfgs', alpha = 1e-5, hidden_layer_sizes = (5,2), random_state = 2)
-    clf.fit(X_train, y_train)
-    predictions = clf.predict(X_test)
-    accuracy = accuracy_score(y_test, predictions)
-
-    return predictions, accuracy
-
-def gbc(X_train, X_test, y_train, y_test):
-    '''
-    pass in the 4 TTS
-    will return predictions and accuracy
-    '''
-    model = GradientBoostingClassifier()
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-
-    return y_pred, accuracy
+    return df_final
 
 def kfold_logistic(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
     df = df_final.copy()
     y1 = df.pop('home_team_win')
     # variable 1 to predict
@@ -290,198 +88,707 @@ def kfold_logistic(df_final):
     kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
     index = 0
     accuracy = np.empty(5)
-    logistic = LogisticRegression()
+    model = LogisticRegression()
     for train, test in kf:
-        logistic.fit(X[train], y1[train])
-        pred = logistic.predict(X[test])
+        model.fit(X[train], y1[train])
+        pred = model.predict(X[test])
         accuracy[index] = accuracy_score(y1[test], pred)
         index +=1
 
-    return accuracy, np.mean(accuracy)
+    return np.mean(accuracy)
+
+def kfold_lasso(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = Lasso(alpha = 0.0001, fit_intercept = False, normalize = True)
+    for train, test in kf:
+        model.fit(X[train], y2[train])
+        pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_ridge(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = Ridge(alpha = 0.0001, fit_intercept = False, normalize = True)
+    for train, test in kf:
+        model.fit(X[train], y2[train])
+        pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_elastic(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = ElasticNet(alpha = 0.0001, fit_intercept = False, normalize = True)
+    for train, test in kf:
+        model.fit(X[train], y2[train])
+        pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_linear(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = LinearRegression(n_jobs = -1, fit_intercept = False, normalize = True)
+    for train, test in kf:
+        model.fit(X[train], y2[train])
+        pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_sgd(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = SGDRegressor(n_iter = 100)
+    for train, test in kf:
+        model.fit(X[train], y2[train])
+        pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_rfc(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = RandomForestClassifier(random_state = 2)
+    for train, test in kf:
+        model.fit(X[train], y1[train])
+        pred = model.predict(X[test])
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_rfr(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = RandomForestRegressor(random_state = 2)
+    for train, test in kf:
+        model.fit(X[train], y2[train])
+        pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_xgbc(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = xgb.XGBClassifier()
+    for train, test in kf:
+        model.fit(X[train], y1[train])
+        pred = model.predict(X[test])
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_xgbr(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = xgb.XGBRegressor()
+    for train, test in kf:
+        model.fit(X[train], y2[train])
+        pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_mlp(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = MLPClassifier(solver = 'lbfgs', alpha = 1e-5, hidden_layer_sizes = (5,2), random_state = 2)
+    for train, test in kf:
+        scaler = StandardScaler()
+        scaler.fit(X[train])
+        X[train] = scaler.transform(X[train])
+        X[test] = scaler.transform(X[test])
+        model.fit(X[train], y1[train])
+        pred = model.predict(X[test])
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_gbc(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = GradientBoostingClassifier()
+    for train, test in kf:
+        model.fit(X[train], y1[train])
+        pred = model.predict(X[test])
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
 
 if __name__ == '__main__':
 
     # this gets the most recent final csv files
     # if you want up-to-date information, re-run DataCleaning.py
-    df_final2 = pd.read_csv('data/final2.csv')
+    df_final2 = pd.read_csv('data/final2LS.csv')
     df_final2.drop(['Unnamed: 0'], axis = 1, inplace = True)
-    df_final5 = pd.read_csv('data/final5.csv')
+    df_final5 = pd.read_csv('data/final5LS.csv')
     df_final5.drop(['Unnamed: 0'], axis = 1, inplace = True)
-    df_final10 = pd.read_csv('data/final10.csv')
+    df_final10 = pd.read_csv('data/final10LS.csv')
     df_final10.drop(['Unnamed: 0'], axis = 1, inplace = True)
-    df_final15 = pd.read_csv('data/final15.csv')
+    df_final15 = pd.read_csv('data/final15LS.csv')
     df_final15.drop(['Unnamed: 0'], axis = 1, inplace = True)
 
     # making new dataframes for 10, 15 games with proportion data
     # only doing this for 5, 10, and 15 games because those seem to perform the best
-    df_final5_prop = proportion_data(df_final5)
-    df_final10_prop = proportion_data(df_final10)
-    df_final15_prop = proportion_data(df_final15)
+    df_final5_r = proportion_data(df_final5)
+    df_final10_r = proportion_data(df_final10)
+    df_final15_r = proportion_data(df_final15)
 
     # drop variables
-    # df_final2 = drop_variables(df_final2)
-    # df_final5 = drop_variables(df_final5)
-    # df_final10 = drop_variables(df_final10)
-    # df_final15 = drop_variables(df_final15)
+    df_final2 = drop_variables(df_final2)
+    df_final5 = drop_variables(df_final5)
+    df_final10 = drop_variables(df_final10)
+    df_final15 = drop_variables(df_final15)
+    df_final5_r = drop_variables_ratio(df_final5_r)
+    df_final10_r = drop_variables_ratio(df_final10_r)
+    df_final15_r = drop_variables_ratio(df_final15_r)
 
     # the goal is to predict 2 variables:
     # 1) home team W/L
     # 2) spread
 
-    # Each of the following results is a list of TTS arrays
-    # Future steps will index into the list to run a model for each element of the array
-    # then take an average of the accuracy scores for each model.
-    # get train_test_split for 2 games
-    X_train2, X_test2, y1_train2, y1_test2, y2_train2, y2_test2 = make_train_test(df_final2)
-    # get train_test_split for 5 games
-    X_train5, X_test5, y1_train5, y1_test5, y2_train5, y2_test5 = make_train_test(df_final5)
-    # get train_test_split for 10 games
-    X_train10, X_test10, y1_train10, y1_test10, y2_train10, y2_test10 = make_train_test(df_final10)
-    # get train_test_split for 15 games
-    X_train15, X_test15, y1_train15, y1_test15, y2_train15, y2_test15 = make_train_test(df_final15)
-
-    # get train_test_split for 5 games, proportion_data
-    X1_train5, X1_test5, y1_train5, y1_test5, y2_train5, y2_test5 = make_train_test(df_final5_prop)
-    # get train_test_split for 10 games, proportion_data
-    X1_train10, X1_test10, y1_train10, y1_test10, y2_train10, y2_test10 = make_train_test(df_final10_prop)
-    # get train_test_split for 15 games, proportion_data
-    X1_train15, X1_test15, y1_train15, y1_test15, y2_train15, y2_test15 = make_train_test(df_final15_prop)
-
-    accuracy2, logistic2_accuracy = kfold_logistic(df_final2)
-    accuracy5, logistic5_accuracy = kfold_logistic(df_final5)
-    accuracy10, logistic10_accuracy = kfold_logistic(df_final10)
-    accuracy15, logistic15_accuracy = kfold_logistic(df_final15)
-
     # Logistic Regression results
-    # LogReg2_accuracy = logistic(X_train2, X_test2, y1_train2, y1_test2)
-    # LogReg5_accuracy, LogReg5_predict = logistic(Xtr15, Xte15, ytr15, yte15)
-    # LogReg10_accuracy, LogReg10_predict = logistic(Xtr110, Xte110, ytr110, yte110)
-    # LogReg15_accuracy, LogReg15_predict = logistic(Xtr115, Xte115, ytr115, yte115)
-    # LogReg5pred_accuracy, LogReg5pred_predict = logistic(X1_train5, X1_test5, y1_train5, y1_test5)
-    # LogReg10pred_accuracy, LogReg10pred_predict = logistic(X1_train10, X1_test10, y1_train10, y1_test10)
-    # LogReg15pred_accuracy, LogReg15pred_predict = logistic(X1_train15, X1_test15, y1_train15, y1_test15)
+    logistic2_accuracy = kfold_logistic(df_final2)
+    logistic5_accuracy = kfold_logistic(df_final5)
+    logistic10_accuracy = kfold_logistic(df_final10)
+    logistic15_accuracy = kfold_logistic(df_final15)
+    logistic5_r_accuracy = kfold_logistic(df_final5_r)
+    logistic10_r_accuracy = kfold_logistic(df_final10_r)
+    logistic15_r_accuracy = kfold_logistic(df_final15_r)
 
-    # # Linear Regression results
-    # # Lasso
-    # Lasso2_pred, Lasso2_accuracy = lasso(Xtr22, Xte22, ytr22, yte12)
-    # Lasso5_pred, Lasso5_accuracy = lasso(Xtr25, Xte25, ytr25, yte15)
-    # Lasso10_pred, Lasso10_accuracy = lasso(Xtr210, Xte210, ytr210, yte110)
-    # Lasso15_pred, Lasso15_accuracy = lasso(Xtr215, Xte215, ytr215, yte115)
-    # Lasso5pred_pred, Lasso5pred_accuracy = lasso(X2_train5, X2_test5, y2_train5, y1_test5)
-    # Lasso10pred_pred, Lasso10pred_accuracy = lasso(X2_train10, X2_test10, y2_train10, y1_test10)
-    # Lasso15pred_pred, Lasso15pred_accuracy = lasso(X2_train15, X2_test15, y2_train15, y1_test15)
-    # # Ridge
-    # Ridge2_pred, Ridge2_accuracy = ridge(Xtr22, Xte22, ytr22, yte12)
-    # Ridge5_pred, Ridge5_accuracy = ridge(Xtr25, Xte25, ytr25, yte15)
-    # Ridge10_pred, Ridge10_accuracy = ridge(Xtr210, Xte210, ytr210, yte110)
-    # Ridge15_pred, Ridge15_accuracy = ridge(Xtr215, Xte215, ytr215, yte115)
-    # Ridge5pred_pred, Ridge5pred_accuracy = ridge(X2_train5, X2_test5, y2_train5, y1_test5)
-    # Ridge10pred_pred, Ridge10pred_accuracy = ridge(X2_train10, X2_test10, y2_train10, y1_test10)
-    # Ridge15pred_pred, Ridge15pred_accuracy = ridge(X2_train15, X2_test15, y2_train15, y1_test15)
-    # # Elastic Net
-    # EN2_pred, EN2_accuracy = elastic(Xtr22, Xte22, ytr22, yte12)
-    # EN5_pred, EN5_accuracy = elastic(Xtr25, Xte25, ytr25, yte15)
-    # EN10_pred, EN10_accuracy = elastic(Xtr210, Xte210, ytr210, yte110)
-    # EN15_pred, EN15_accuracy = elastic(Xtr215, Xte215, ytr215, yte115)
-    # EN5pred_pred, EN5pred_accuracy = elastic(X2_train5, X2_test5, y2_train5, y1_test5)
-    # EN10pred_pred, EN10pred_accuracy = elastic(X2_train10, X2_test10, y2_train10, y1_test10)
-    # EN15pred_pred, EN15pred_accuracy = elastic(X2_train15, X2_test15, y2_train15, y1_test15)
-    # # Linear Regression
-    # LR2_pred, LR2_accuracy = linear(Xtr22, Xte22, ytr22, yte12)
-    # LR5_pred, LR5_accuracy = linear(Xtr25, Xte25, ytr25, yte15)
-    # LR10_pred, LR10_accuracy = linear(Xtr210, Xte210, ytr210, yte110)
-    # LR15_pred, LR15_accuracy = linear(Xtr215, Xte215, ytr215, yte115)
-    # LR5pred_pred, LR5pred_accuracy = linear(X2_train5, X2_test5, y2_train5, y1_test5)
-    # LR10pred_pred, LR10pred_accuracy = linear(X2_train10, X2_test10, y2_train10, y1_test10)
-    # LR15pred_pred, LR15pred_accuracy = linear(X2_train15, X2_test15, y2_train15, y1_test15)
-    # # SGD Regressor
-    # SGD2_pred, SGD2_accuracy = sgd(Xtr22, Xte22, ytr22, yte12)
-    # SGD5_pred, SGD5_accuracy = sgd(Xtr25, Xte25, ytr25, yte15)
-    # SGD10_pred, SGD10_accuracy = sgd(Xtr210, Xte210, ytr210, yte110)
-    # SGD15_pred, SGD15_accuracy = sgd(Xtr215, Xte215, ytr215, yte115)
-    # SGD5pred_pred, SGD5pred_accuracy = sgd(X2_train5, X2_test5, y2_train5, y1_test5)
-    # SGD10pred_pred, SGD10pred_accuracy = sgd(X2_train10, X2_test10, y2_train10, y1_test10)
-    # SGD15pred_pred, SGD15pred_accuracy = sgd(X2_train15, X2_test15, y2_train15, y1_test15)
-    #
-    # # Random Forest Classifier results
-    # RFC2_accuracy, RFC2_pred, RFC2_features = random_forest_classifier(Xtr12, Xte12, ytr12, yte12)
-    # RFC5_accuracy, RFC5_pred, RFC5_features = random_forest_classifier(Xtr15, Xte15, ytr15, yte15)
-    # RFC10_accuracy, RFC10_pred, RFC10_features = random_forest_classifier(Xtr110, Xte110, ytr110, yte110)
-    # RFC15_accuracy, RFC15_pred, RFC15_features = random_forest_classifier(Xtr115, Xte115, ytr115, yte115)
-    # RFC5pred_accuracy, RFC5pred_pred, RFC5pred_features = random_forest_classifier(X1_train5, X1_test5, y1_train5, y1_test5)
-    # RFC10pred_accuracy, RFC10pred_pred, RFC10pred_features = random_forest_classifier(X1_train10, X1_test10, y1_train10, y1_test10)
-    # RFC15pred_accuracy, RFC15pred_pred, RFC15pred_features = random_forest_classifier(X1_train15, X1_test15, y1_train15, y1_test15)
-    #
-    # # Random Forest Regressor results
-    # RFR2_pred, RFR2_accuracy, RFR2_features = random_forest_regressor(Xtr22, Xte22, ytr22, yte12)
-    # RFR5_pred, RFR5_accuracy, RFR5_features = random_forest_regressor(Xtr25, Xte25, ytr25, yte15)
-    # RFR10_pred, RFR10_accuracy, RFR10_features = random_forest_regressor(Xtr210, Xte210, ytr210, yte110)
-    # RFR15_pred, RFR15_accuracy, RFR15_features = random_forest_regressor(Xtr215, Xte215, ytr215, yte115)
-    # RFR5pred_pred, RFR5pred_accuracy, RFR5pred_features = random_forest_regressor(X2_train5, X2_test5, y2_train5, y1_test5)
-    # RFR10pred_pred, RFR10pred_accuracy, RFR10pred_features = random_forest_regressor(X2_train10, X2_test10, y2_train10, y1_test10)
-    # RFR15pred_pred, RFR15pred_accuracy, RFR15pred_features = random_forest_regressor(X2_train15, X2_test15, y2_train15, y1_test15)
-    #
-    # # XG Boost results
-    # XGB2_preds, XGB2_accuracy = xgboost(Xtr12, Xte12, ytr12, yte12)
-    # XGB5_preds, XGB5_accuracy = xgboost(Xtr15, Xte15, ytr15, yte15)
-    # XGB10_preds, XGB10_accuracy = xgboost(Xtr110, Xte110, ytr110, yte110)
-    # XGB15_preds, XGB15_accuracy = xgboost(Xtr115, Xte115, ytr115, yte115)
-    # XGB5pred_preds, XGB5pred_accuracy = xgboost(X1_train5, X1_test5, y1_train5, y1_test5)
-    # XGB10pred_preds, XGB10pred_accuracy = xgboost(X1_train10, X1_test10, y1_train10, y1_test10)
-    # XGB15pred_preds, XGB15pred_accuracy = xgboost(X1_train15, X1_test15, y1_train15, y1_test15)
-    #
-    # # XG Boost Regressor results
-    # XGBr2_preds, XGBr2_accuracy = xgboost_reg(Xtr22, Xte22, ytr22, yte12)
-    # XGBr5_preds, XGBr5_accuracy = xgboost_reg(Xtr25, Xte25, ytr25, yte15)
-    # XGBr10_preds, XGBr10_accuracy = xgboost_reg(Xtr210, Xte210, ytr210, yte110)
-    # XGBr15_preds, XGBr15_accuracy = xgboost_reg(Xtr215, Xte215, ytr215, yte115)
-    # XGBr5pred_preds, XGBr5pred_accuracy = xgboost_reg(X2_train5, X2_test5, y2_train5, y1_test5)
-    # XGBr10pred_preds, XGBr10pred_accuracy = xgboost_reg(X2_train10, X2_test10, y2_train10, y1_test10)
-    # XGBr15pred_preds, XGBr15pred_accuracy = xgboost_reg(X2_train15, X2_test15, y2_train15, y1_test15)
-    #
-    # # MLP results
-    # MLP2_preds, MLP2_accuracy = mlp(Xtr12, Xte12, ytr12, yte12)
-    # MLP5_preds, MLP5_accuracy = mlp(Xtr15, Xte15, ytr15, yte15)
-    # MLP10_preds, MLP10_accuracy = mlp(Xtr110, Xte110, ytr110, yte110)
-    # MLP15_preds, MLP15_accuracy = mlp(Xtr115, Xte115, ytr115, yte115)
-    # MLP5pred_preds, MLP5pred_accuracy = mlp(X1_train5, X1_test5, y1_train5, y1_test5)
-    # MLP10pred_preds, MLP10pred_accuracy = mlp(X1_train10, X1_test10, y1_train10, y1_test10)
-    # MLP15pred_preds, MLP15pred_accuracy = mlp(X1_train15, X1_test15, y1_train15, y1_test15)
-    #
-    # # Gradient Boosting Classifier results
-    # GBC2_preds, GBC2_accuracy = gbc(Xtr12, Xte12, ytr12, yte12)
-    # GBC5_preds, GBC5_accuracy = gbc(Xtr15, Xte15, ytr15, yte15)
-    # GBC10_preds, GBC10_accuracy = gbc(Xtr110, Xte110, ytr110, yte110)
-    # GBC15_preds, GBC15_accuracy = gbc(Xtr115, Xte115, ytr115, yte115)
-    # GBC5pred_preds, GBC5pred_accuracy = gbc(X1_train5, X1_test5, y1_train5, y1_test5)
-    # GBC10pred_preds, GBC10pred_accuracy = gbc(X1_train10, X1_test10, y1_train10, y1_test10)
-    # GBC15pred_preds, GBC15pred_accuracy = gbc(X1_train15, X1_test15, y1_train15, y1_test15)
-    #
-    # print 'LogReg15_accuracy'
-    # print LogReg15_accuracy
-    # print 'SGD2_accuracy'
-    # print SGD2_accuracy
-    # print 'RFR10_accuracy'
-    # print RFR10_accuracy
-    # print 'LogReg10pred_accuracy'
-    # print LogReg10pred_accuracy
-    # print 'LogReg15pred_accuracy'
-    # print LogReg10pred_accuracy
-    # print 'Lasso10_accuracy'
-    # print Lasso10_accuracy
-    # print 'Lasso15_accuracy'
-    # print Lasso15_accuracy
-    # print 'Ridge10_accuracy'
-    # print Ridge10_accuracy
-    # print 'Ridge15_accuracy'
-    # print Ridge15_accuracy
-    # print 'LR10_accuracy'
-    # print LR10_accuracy
-    # print 'LR15_accuracy'
-    # print LR15_accuracy
-    # print 'RFR10pred_accuracy'
-    # print RFR10pred_accuracy
-    # print 'XGBr10_accuracy'
-    # print XGBr10_accuracy
-    # print 'MLP5pred_accuracy'
-    # print MLP5pred_accuracy
+    # Linear Regression results
+    # Lasso
+    lasso2_accuracy = kfold_lasso(df_final2)
+    lasso5_accuracy = kfold_lasso(df_final5)
+    lasso10_accuracy = kfold_lasso(df_final10)
+    lasso15_accuracy = kfold_lasso(df_final15)
+    lasso5_r_accuracy = kfold_lasso(df_final5_r)
+    lasso10_r_accuracy = kfold_lasso(df_final10_r)
+    lasso15_r_accuracy = kfold_lasso(df_final15_r)
+    # Ridge
+    ridge2_accuracy = kfold_ridge(df_final2)
+    ridge5_accuracy = kfold_ridge(df_final5)
+    ridge10_accuracy = kfold_ridge(df_final10)
+    ridge15_accuracy = kfold_ridge(df_final15)
+    ridge5_r_accuracy = kfold_ridge(df_final5_r)
+    ridge10_r_accuracy = kfold_ridge(df_final10_r)
+    ridge15_r_accuracy = kfold_ridge(df_final15_r)
+    # Elastic Net
+    elastic2_accuracy = kfold_elastic(df_final2)
+    elastic5_accuracy = kfold_elastic(df_final5)
+    elastic10_accuracy = kfold_elastic(df_final10)
+    elastic15_accuracy = kfold_elastic(df_final15)
+    elastic5_r_accuracy = kfold_elastic(df_final5_r)
+    elastic10_r_accuracy = kfold_elastic(df_final10_r)
+    elastic15_r_accuracy = kfold_elastic(df_final15_r)
+    # Linear Regression
+    linear2_accuracy = kfold_linear(df_final2)
+    linear5_accuracy = kfold_linear(df_final5)
+    linear10_accuracy = kfold_linear(df_final10)
+    linear15_accuracy = kfold_linear(df_final15)
+    linear5_r_accuracy = kfold_linear(df_final5_r)
+    linear10_r_accuracy = kfold_linear(df_final10_r)
+    linear15_r_accuracy = kfold_linear(df_final15_r)
+    # SGD Regressor
+    sgd2_accuracy = kfold_sgd(df_final2)
+    sgd5_accuracy = kfold_sgd(df_final5)
+    sgd10_accuracy = kfold_sgd(df_final10)
+    sgd15_accuracy = kfold_sgd(df_final15)
+    sgd5_r_accuracy = kfold_sgd(df_final5_r)
+    sgd10_r_accuracy = kfold_sgd(df_final10_r)
+    sgd15_r_accuracy = kfold_sgd(df_final15_r)
+
+    # Random Forest Classifier results
+    rfc2_accuracy = kfold_rfc(df_final2)
+    rfc5_accuracy = kfold_rfc(df_final5)
+    rfc10_accuracy = kfold_rfc(df_final10)
+    rfc15_accuracy = kfold_rfc(df_final15)
+    rfc5_r_accuracy = kfold_rfc(df_final5_r)
+    rfc10_r_accuracy = kfold_rfc(df_final10_r)
+    rfc15_r_accuracy = kfold_rfc(df_final15_r)
+    # Random Forest Regressor results
+    rfr2_accuracy = kfold_rfr(df_final2)
+    rfr5_accuracy = kfold_rfr(df_final5)
+    rfr10_accuracy = kfold_rfr(df_final10)
+    rfr15_accuracy = kfold_rfr(df_final15)
+    rfr5_r_accuracy = kfold_rfr(df_final5_r)
+    rfr10_r_accuracy = kfold_rfr(df_final10_r)
+    rfr15_r_accuracy = kfold_rfr(df_final15_r)
+
+    # XG Boost Classifier results
+    xgbc2_accuracy = kfold_xgbc(df_final2)
+    xgbc5_accuracy = kfold_xgbc(df_final5)
+    xgbc10_accuracy = kfold_xgbc(df_final10)
+    xgbc15_accuracy = kfold_xgbc(df_final15)
+    xgbc5_r_accuracy = kfold_xgbc(df_final5_r)
+    xgbc10_r_accuracy = kfold_xgbc(df_final10_r)
+    xgbc15_r_accuracy = kfold_xgbc(df_final15_r)
+    # XG Boost Regressor results
+    xgbr2_accuracy = kfold_xgbr(df_final2)
+    xgbr5_accuracy = kfold_xgbr(df_final5)
+    xgbr10_accuracy = kfold_xgbr(df_final10)
+    xgbr15_accuracy = kfold_xgbr(df_final15)
+    xgbr5_r_accuracy = kfold_xgbr(df_final5_r)
+    xgbr10_r_accuracy = kfold_xgbr(df_final10_r)
+    xgbr15_r_accuracy = kfold_xgbr(df_final15_r)
+
+    # MLP results
+    mlp2_accuracy = kfold_mlp(df_final2)
+    mlp5_accuracy = kfold_mlp(df_final5)
+    mlp10_accuracy = kfold_mlp(df_final10)
+    mlp15_accuracy = kfold_mlp(df_final15)
+    mlp5_r_accuracy = kfold_mlp(df_final5_r)
+    mlp10_r_accuracy = kfold_mlp(df_final10_r)
+    mlp15_r_accuracy = kfold_mlp(df_final15_r)
+
+    # Gradient Boosting Classifier results
+    gbc2_accuracy = kfold_gbc(df_final2)
+    gbc5_accuracy = kfold_gbc(df_final5)
+    gbc10_accuracy = kfold_gbc(df_final10)
+    gbc15_accuracy = kfold_gbc(df_final15)
+    gbc5_r_accuracy = kfold_gbc(df_final5_r)
+    gbc10_r_accuracy = kfold_gbc(df_final10_r)
+    gbc15_r_accuracy = kfold_gbc(df_final15_r)
+
+    # if logistic2_accuracy > 0.54:
+    #     print 'logistic 2'
+    #     print logistic2_accuracy
+    # if logistic5_accuracy > 0.54:
+    #     print 'logistic 5'
+    #     print logistic5_accuracy
+    # if logistic10_accuracy > 0.54:
+    #     print 'logistic 10'
+    #     print logistic10_accuracy
+    # if logistic15_accuracy > 0.54:
+    #     print 'logistic 15'
+    #     print logistic15_accuracy
+    # if logistic5_r_accuracy > 0.54:
+    #     print 'logistic 5r'
+    #     print logistic5_r_accuracy
+    # if logistic10_r_accuracy > 0.54:
+    #     print 'logistic 10r'
+    #     print logistic10_r_accuracy
+    # if logistic15_r_accuracy > 0.54:
+    #     print 'logistic 15r'
+    #     print logistic15_r_accuracy
+    # if lasso2_accuracy > 0.54:
+    #     print 'lasso 2'
+    #     print lasso2_accuracy
+    # if lasso5_accuracy > 0.54:
+    #     print 'lasso 5'
+    #     print lasso5_accuracy
+    # if lasso10_accuracy > 0.54:
+    #     print 'lasso 10'
+    #     print lasso10_accuracy
+    # if lasso15_accuracy > 0.54:
+    #     print 'lasso 15'
+    #     print lasso15_accuracy
+    # if lasso5_r_accuracy > 0.54:
+    #     print 'lasso 5r'
+    #     print lasso5_r_accuracy
+    # if lasso10_r_accuracy > 0.54:
+    #     print 'lasso 10r'
+    #     print lasso10_r_accuracy
+    # if lasso15_r_accuracy > 0.54:
+    #     print 'lasso 15r'
+    #     print lasso15_r_accuracy
+    # if ridge2_accuracy > 0.54:
+    #     print 'ridge 2'
+    #     print ridge2_accuracy
+    # if ridge5_accuracy > 0.54:
+    #     print 'ridge 5'
+    #     print ridge5_accuracy
+    # if ridge10_accuracy > 0.54:
+    #     print 'ridge 10'
+    #     print ridge10_accuracy
+    # if ridge15_accuracy > 0.54:
+    #     print 'ridge 15'
+    #     print ridge15_accuracy
+    # if ridge5_r_accuracy > 0.54:
+    #     print 'ridge 5r'
+    #     print ridge5_r_accuracy
+    # if ridge10_r_accuracy > 0.54:
+    #     print 'ridge 10r'
+    #     print ridge10_r_accuracy
+    # if ridge15_r_accuracy > 0.54:
+    #     print 'ridge 15r'
+    #     print ridge15_r_accuracy
+    # if elastic2_accuracy > 0.54:
+    #     print 'elastic 2'
+    #     print elastic2_accuracy
+    # if elastic5_accuracy > 0.54:
+    #     print 'elastic 5'
+    #     print elastic5_accuracy
+    # if elastic10_accuracy > 0.54:
+    #     print 'elastic 10'
+    #     print elastic10_accuracy
+    # if elastic15_accuracy > 0.54:
+    #     print 'elastic 15'
+    #     print elastic15_accuracy
+    # if elastic5_r_accuracy > 0.54:
+    #     print 'elastic 5r'
+    #     print elastic5_r_accuracy
+    # if elastic10_r_accuracy > 0.54:
+    #     print 'elastic 10r'
+    #     print elastic10_r_accuracy
+    # if elastic15_r_accuracy > 0.54:
+    #     print 'elastic 15r'
+    #     print elastic15_r_accuracy
+    # if linear2_accuracy > 0.54:
+    #     print 'linear 2'
+    #     print linear2_accuracy
+    # if linear5_accuracy > 0.54:
+    #     print 'linear 5'
+    #     print linear5_accuracy
+    # if linear10_accuracy > 0.54:
+    #     print 'linear 10'
+    #     print linear10_accuracy
+    # if linear15_accuracy > 0.54:
+    #     print 'linear 15'
+    #     print linear15_accuracy
+    # if linear5_r_accuracy > 0.54:
+    #     print 'linear 5r'
+    #     print linear5_r_accuracy
+    # if linear10_r_accuracy > 0.54:
+    #     print 'linear 10r'
+    #     print linear10_r_accuracy
+    # if linear15_r_accuracy > 0.54:
+    #     print 'linear 15r'
+    #     print linear15_r_accuracy
+    # if sgd2_accuracy > 0.54:
+    #     print 'sgd 2'
+    #     print sgd2_accuracy
+    # if sgd5_accuracy > 0.54:
+    #     print 'sgd 5'
+    #     print sgd5_accuracy
+    # if sgd10_accuracy > 0.54:
+    #     print 'sgd 10'
+    #     print sgd10_accuracy
+    # if sgd15_accuracy > 0.54:
+    #     print 'sgd 15'
+    #     print sgd15_accuracy
+    # if sgd5_r_accuracy > 0.54:
+    #     print 'sgd 5r'
+    #     print sgd5_r_accuracy
+    # if sgd10_r_accuracy > 0.54:
+    #     print 'sgd 10r'
+    #     print sgd10_r_accuracy
+    # if sgd15_r_accuracy > 0.54:
+    #     print 'sgd 15r'
+    #     print sgd15_r_accuracy
+    # if rfc2_accuracy > 0.54:
+    #     print 'rfc  2'
+    #     print rfc2_accuracy
+    # if rfc5_accuracy > 0.54:
+    #     print 'rfc  5'
+    #     print rfc5_accuracy
+    # if rfc10_accuracy > 0.54:
+    #     print 'rfc  10'
+    #     print rfc10_accuracy
+    # if rfc15_accuracy > 0.54:
+    #     print 'rfc  15'
+    #     print rfc15_accuracy
+    # if rfc5_r_accuracy > 0.54:
+    #     print 'rfc 5r'
+    #     print rfc5_r_accuracy
+    # if rfc10_r_accuracy > 0.54:
+    #     print 'rfc 10r'
+    #     print rfc10_r_accuracy
+    # if rfc15_r_accuracy > 0.54:
+    #     print 'rfc 15r'
+    #     print rfc15_r_accuracy
+    # if rfr2_accuracy > 0.54:
+    #     print 'rfr  2'
+    #     print rfr2_accuracy
+    # if rfr5_accuracy > 0.54:
+    #     print 'rfr  5'
+    #     print rfr5_accuracy
+    # if rfr10_accuracy > 0.54:
+    #     print 'rfr  10'
+    #     print rfr10_accuracy
+    # if rfr15_accuracy > 0.54:
+    #     print 'rfr  15'
+    #     print rfr15_accuracy
+    # if rfr5_r_accuracy > 0.54:
+    #     print 'rfr 5r'
+    #     print rfr5_r_accuracy
+    # if rfr10_r_accuracy > 0.54:
+    #     print 'rfr 10r'
+    #     print rfr10_r_accuracy
+    # if rfr15_r_accuracy > 0.54:
+    #     print 'rfr 15r'
+    #     print rfr15_r_accuracy
+    # if xgbc2_accuracy > 0.54:
+    #     print 'xgbc 2'
+    #     print xgbc2_accuracy
+    # if xgbc5_accuracy > 0.54:
+    #     print 'xgbc 5'
+    #     print xgbc5_accuracy
+    # if xgbc10_accuracy > 0.54:
+    #     print 'xgbc 10'
+    #     print xgbc10_accuracy
+    # if xgbc15_accuracy > 0.54:
+    #     print 'xgbc 15'
+    #     print xgbc15_accuracy
+    # if xgbc5_r_accuracy > 0.54:
+    #     print 'xgbc 5r'
+    #     print xgbc5_r_accuracy
+    # if xgbc10_r_accuracy > 0.54:
+    #     print 'xgbc 10r'
+    #     print xgbc10_r_accuracy
+    # if xgbc15_r_accuracy > 0.54:
+    #     print 'xgbc 15r'
+    #     print xgbc15_r_accuracy
+    # if xgbr2_accuracy > 0.54:
+    #     print 'xgbr 2'
+    #     print xgbr2_accuracy
+    # if xgbr5_accuracy > 0.54:
+    #     print 'xgbr 5'
+    #     print xgbr5_accuracy
+    # if xgbr10_accuracy > 0.54:
+    #     print 'xgbr 10'
+    #     print xgbr10_accuracy
+    # if xgbr15_accuracy > 0.54:
+    #     print 'xgbr 15'
+    #     print xgbr15_accuracy
+    # if xgbr5_r_accuracy > 0.54:
+    #     print 'xgbr 5r'
+    #     print xgbr5_r_accuracy
+    # if xgbr10_r_accuracy > 0.54:
+    #     print 'xgbr 10r'
+    #     print xgbr10_r_accuracy
+    # if xgbr15_r_accuracy > 0.54:
+    #     print 'xgbr 15r'
+    #     print xgbr15_r_accuracy
+    # if mlp2_accuracy > 0.54:
+    #     print 'mlp 2'
+    #     print mlp2_accuracy
+    # if mlp5_accuracy > 0.54:
+    #     print 'mlp 5'
+    #     print mlp5_accuracy
+    # if mlp10_accuracy > 0.54:
+    #     print 'mlp 10'
+    #     print mlp10_accuracy
+    # if mlp15_accuracy > 0.54:
+    #     print 'mlp 15'
+    #     print mlp15_accuracy
+    # if mlp5_r_accuracy > 0.54:
+    #     print 'mlp 5r'
+    #     print mlp5_r_accuracy
+    # if mlp10_r_accuracy > 0.54:
+    #     print 'mlp 10r'
+    #     print mlp10_r_accuracy
+    # if mlp15_r_accuracy > 0.54:
+    #     print 'mlp 15r'
+    #     print mlp15_r_accuracy
+    # if gbc2_accuracy > 0.54:
+    #     print 'gbc 2'
+    #     print gbc2_accuracy
+    # if gbc5_accuracy > 0.54:
+    #     print 'gbc 5'
+    #     print gbc5_accuracy
+    # if gbc10_accuracy > 0.54:
+    #     print 'gbc 10'
+    #     print gbc10_accuracy
+    # if gbc15_accuracy > 0.54:
+    #     print 'gbc 15'
+    #     print gbc15_accuracy
+    # if gbc5_r_accuracy > 0.54:
+    #     print 'gbc 5r'
+    #     print gbc5_r_accuracy
+    # if gbc10_r_accuracy > 0.54:
+    #     print 'gbc 10r'
+    #     print gbc10_r_accuracy
+    # if gbc15_r_accuracy > 0.54:
+    #     print 'gbc 15r'
+    #     print gbc15_r_accuracy

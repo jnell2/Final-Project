@@ -153,3 +153,14 @@ create a moving df based on most recent 10 games?
 pulled data for last season.
 performed kfold cross validation on data from last season.
 best model: mlp, 5 games. accuracy = 55.6%
+
+Day 12:
+11/12/2016
+played with models and interaction terms using last seasons data.
+best model is still mlp, 5 games (without giveaways). accuracy = 55.6%
+pulled most recent data from nhl.com, data gets accuracy of 53% when run through kfold model.
+got 51% last night.
+next steps:
+1) pickle model (so don't have to retrain)
+2) write function that takes in new data
+3) write function that makes predictions
