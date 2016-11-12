@@ -148,4 +148,8 @@ Day 11:
 having trouble with choosing a model. accuracy changes drastically every time
 I update my data.
 To do: replace train_test_split with KFold, pull data for last season,
-create a moving df based on most recent 10 games? 
+create a moving df based on most recent 10 games?
+
+pulled data for last season.
+performed kfold cross validation on data from last season.
+best model: mlp, 5 games. accuracy = 55.6%
