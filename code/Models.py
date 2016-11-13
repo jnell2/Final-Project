@@ -2,12 +2,14 @@ import pandas as pd
 import numpy as np
 import xgboost as xgb
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LinearRegression, ElasticNet, Lasso, Ridge, SGDRegressor
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.cross_validation import KFold
+from sklearn.svm import SVC, SVR
+from sklearn.naive_bayes import GaussianNB
 
 def proportion_data(df_final):
     '''
@@ -437,6 +439,118 @@ def kfold_gbc(df_final):
 
     return np.mean(accuracy)
 
+def kfold_gbr(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = GradientBoostingRegressor()
+    for train, test in kf:
+        model.fit(X[train], y2[train])
+        pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_svm(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = SVC(kernel = 'sigmoid')
+    for train, test in kf:
+        model.fit(X[train], y1[train])
+        pred = model.predict(X[test])
+        # pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_svmr(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = SVR(kernel = 'sigmoid')
+    for train, test in kf:
+        model.fit(X[train], y2[train])
+        pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
+def kfold_nb(df_final):
+    '''
+    pass in df_final dataframe
+    function performs KFold cross validation, fits model
+    returns mean accuracy
+    '''
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
+    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
+    index = 0
+    accuracy = np.empty(5)
+    model = GaussianNB()
+    for train, test in kf:
+        model.fit(X[train], y2[train])
+        pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
+        accuracy[index] = accuracy_score(y1[test], pred)
+        index +=1
+
+    return np.mean(accuracy)
+
 if __name__ == '__main__':
 
     # this gets the most recent final csv files
@@ -555,7 +669,7 @@ if __name__ == '__main__':
     # xgbr10_r_accuracy = kfold_xgbr(df_final10_r)
     # xgbr15_r_accuracy = kfold_xgbr(df_final15_r)
 
-    # MLP results
+    # MLP Classifier results
     mlp2_accuracy = kfold_mlp(df_final2)
     mlp5_accuracy = kfold_mlp(df_final5)
     mlp10_accuracy = kfold_mlp(df_final10)
@@ -563,6 +677,7 @@ if __name__ == '__main__':
     mlp5_r_accuracy = kfold_mlp(df_final5_r)
     mlp10_r_accuracy = kfold_mlp(df_final10_r)
     mlp15_r_accuracy = kfold_mlp(df_final15_r)
+    # MLP Regressor results
     mlpr2_accuracy = kfold_mlpr(df_final2)
     mlpr5_accuracy = kfold_mlpr(df_final5)
     mlpr10_accuracy = kfold_mlpr(df_final10)
@@ -571,285 +686,42 @@ if __name__ == '__main__':
     mlpr10_r_accuracy = kfold_mlpr(df_final10_r)
     mlpr15_r_accuracy = kfold_mlpr(df_final15_r)
 
-    # # Gradient Boosting Classifier results
-    # gbc2_accuracy = kfold_gbc(df_final2)
-    # gbc5_accuracy = kfold_gbc(df_final5)
-    # gbc10_accuracy = kfold_gbc(df_final10)
-    # gbc15_accuracy = kfold_gbc(df_final15)
-    # gbc5_r_accuracy = kfold_gbc(df_final5_r)
-    # gbc10_r_accuracy = kfold_gbc(df_final10_r)
-    # gbc15_r_accuracy = kfold_gbc(df_final15_r)
+    # Gradient Boosting Classifier results
+    gbc2_accuracy = kfold_gbc(df_final2)
+    gbc5_accuracy = kfold_gbc(df_final5)
+    gbc10_accuracy = kfold_gbc(df_final10)
+    gbc15_accuracy = kfold_gbc(df_final15)
+    gbc5_r_accuracy = kfold_gbc(df_final5_r)
+    gbc10_r_accuracy = kfold_gbc(df_final10_r)
+    gbc15_r_accuracy = kfold_gbc(df_final15_r)
+    # Gradient Boosting Regressor results
+    gbr2_accuracy = kfold_gbr(df_final2)
+    gbr5_accuracy = kfold_gbr(df_final5)
+    gbr10_accuracy = kfold_gbr(df_final10)
+    gbr15_accuracy = kfold_gbr(df_final15)
+    gbr5_r_accuracy = kfold_gbr(df_final5_r)
+    gbr10_r_accuracy = kfold_gbr(df_final10_r)
+    gbr15_r_accuracy = kfold_gbr(df_final15_r)
 
-# # if logistic2_accuracy > 0.54:
-#     print 'logistic 2'
-#     print logistic2_accuracy
-# # if logistic5_accuracy > 0.54:
-#     print 'logistic 5'
-#     print logistic5_accuracy
-# # if logistic10_accuracy > 0.54:
-#     print 'logistic 10'
-#     print logistic10_accuracy
-# # if logistic15_accuracy > 0.54:
-#     print 'logistic 15'
-#     print logistic15_accuracy
-# # if logistic5_r_accuracy > 0.54:
-#     print 'logistic 5r'
-#     print logistic5_r_accuracy
-# # if logistic10_r_accuracy > 0.54:
-#     print 'logistic 10r'
-#     print logistic10_r_accuracy
-# # if logistic15_r_accuracy > 0.54:
-#     print 'logistic 15r'
-#     print logistic15_r_accuracy
-# # if lasso2_accuracy > 0.54:
-#     print 'lasso 2'
-#     print lasso2_accuracy
-# # if lasso5_accuracy > 0.54:
-#     print 'lasso 5'
-#     print lasso5_accuracy
-# # if lasso10_accuracy > 0.54:
-#     print 'lasso 10'
-#     print lasso10_accuracy
-# # if lasso15_accuracy > 0.54:
-#     print 'lasso 15'
-#     print lasso15_accuracy
-# # if lasso5_r_accuracy > 0.54:
-#     print 'lasso 5r'
-#     print lasso5_r_accuracy
-# # if lasso10_r_accuracy > 0.54:
-#     print 'lasso 10r'
-#     print lasso10_r_accuracy
-# # if lasso15_r_accuracy > 0.54:
-#     print 'lasso 15r'
-#     print lasso15_r_accuracy
-# # if ridge2_accuracy > 0.54:
-#     print 'ridge 2'
-#     print ridge2_accuracy
-# # if ridge5_accuracy > 0.54:
-#     print 'ridge 5'
-#     print ridge5_accuracy
-# # if ridge10_accuracy > 0.54:
-#     print 'ridge 10'
-#     print ridge10_accuracy
-# # if ridge15_accuracy > 0.54:
-#     print 'ridge 15'
-#     print ridge15_accuracy
-# # if ridge5_r_accuracy > 0.54:
-#     print 'ridge 5r'
-#     print ridge5_r_accuracy
-# # if ridge10_r_accuracy > 0.54:
-#     print 'ridge 10r'
-#     print ridge10_r_accuracy
-# # if ridge15_r_accuracy > 0.54:
-#     print 'ridge 15r'
-#     print ridge15_r_accuracy
-# # if elastic2_accuracy > 0.54:
-#     print 'elastic 2'
-#     print elastic2_accuracy
-# # if elastic5_accuracy > 0.54:
-#     print 'elastic 5'
-#     print elastic5_accuracy
-# # if elastic10_accuracy > 0.54:
-#     print 'elastic 10'
-#     print elastic10_accuracy
-# # if elastic15_accuracy > 0.54:
-#     print 'elastic 15'
-#     print elastic15_accuracy
-# # if elastic5_r_accuracy > 0.54:
-#     print 'elastic 5r'
-#     print elastic5_r_accuracy
-# # if elastic10_r_accuracy > 0.54:
-#     print 'elastic 10r'
-#     print elastic10_r_accuracy
-# # if elastic15_r_accuracy > 0.54:
-#     print 'elastic 15r'
-#     print elastic15_r_accuracy
-# # if linear2_accuracy > 0.54:
-#     print 'linear 2'
-#     print linear2_accuracy
-# # if linear5_accuracy > 0.54:
-#     print 'linear 5'
-#     print linear5_accuracy
-# # if linear10_accuracy > 0.54:
-#     print 'linear 10'
-#     print linear10_accuracy
-# # if linear15_accuracy > 0.54:
-#     print 'linear 15'
-#     print linear15_accuracy
-# # if linear5_r_accuracy > 0.54:
-#     print 'linear 5r'
-#     print linear5_r_accuracy
-# # if linear10_r_accuracy > 0.54:
-#     print 'linear 10r'
-#     print linear10_r_accuracy
-# # if linear15_r_accuracy > 0.54:
-#     print 'linear 15r'
-#     print linear15_r_accuracy
-# # if sgd2_accuracy > 0.54:
-#     print 'sgd 2'
-#     print sgd2_accuracy
-# # if sgd5_accuracy > 0.54:
-#     print 'sgd 5'
-#     print sgd5_accuracy
-# # if sgd10_accuracy > 0.54:
-#     print 'sgd 10'
-#     print sgd10_accuracy
-# # if sgd15_accuracy > 0.54:
-#     print 'sgd 15'
-#     print sgd15_accuracy
-# # if sgd5_r_accuracy > 0.54:
-#     print 'sgd 5r'
-#     print sgd5_r_accuracy
-# # if sgd10_r_accuracy > 0.54:
-#     print 'sgd 10r'
-#     print sgd10_r_accuracy
-# # if sgd15_r_accuracy > 0.54:
-#     print 'sgd 15r'
-#     print sgd15_r_accuracy
-# # if rfc2_accuracy > 0.54:
-#     print 'rfc  2'
-#     print rfc2_accuracy
-# # if rfc5_accuracy > 0.54:
-#     print 'rfc  5'
-#     print rfc5_accuracy
-# # if rfc10_accuracy > 0.54:
-#     print 'rfc  10'
-#     print rfc10_accuracy
-# # if rfc15_accuracy > 0.54:
-#     print 'rfc  15'
-#     print rfc15_accuracy
-# # if rfc5_r_accuracy > 0.54:
-#     print 'rfc 5r'
-#     print rfc5_r_accuracy
-# # if rfc10_r_accuracy > 0.54:
-#     print 'rfc 10r'
-#     print rfc10_r_accuracy
-# # if rfc15_r_accuracy > 0.54:
-#     print 'rfc 15r'
-#     print rfc15_r_accuracy
-# # if rfr2_accuracy > 0.54:
-#     print 'rfr  2'
-#     print rfr2_accuracy
-# # if rfr5_accuracy > 0.54:
-#     print 'rfr  5'
-#     print rfr5_accuracy
-# # if rfr10_accuracy > 0.54:
-#     print 'rfr  10'
-#     print rfr10_accuracy
-# # if rfr15_accuracy > 0.54:
-#     print 'rfr  15'
-#     print rfr15_accuracy
-# # if rfr5_r_accuracy > 0.54:
-#     print 'rfr 5r'
-#     print rfr5_r_accuracy
-# # if rfr10_r_accuracy > 0.54:
-#     print 'rfr 10r'
-#     print rfr10_r_accuracy
-# # if rfr15_r_accuracy > 0.54:
-#     print 'rfr 15r'
-#     print rfr15_r_accuracy
-# # if xgbc2_accuracy > 0.54:
-#     print 'xgbc 2'
-#     print xgbc2_accuracy
-# # if xgbc5_accuracy > 0.54:
-#     print 'xgbc 5'
-#     print xgbc5_accuracy
-# # if xgbc10_accuracy > 0.54:
-#     print 'xgbc 10'
-#     print xgbc10_accuracy
-# # if xgbc15_accuracy > 0.54:
-#     print 'xgbc 15'
-#     print xgbc15_accuracy
-# # if xgbc5_r_accuracy > 0.54:
-#     print 'xgbc 5r'
-#     print xgbc5_r_accuracy
-# # if xgbc10_r_accuracy > 0.54:
-#     print 'xgbc 10r'
-#     print xgbc10_r_accuracy
-# # if xgbc15_r_accuracy > 0.54:
-#     print 'xgbc 15r'
-#     print xgbc15_r_accuracy
-# # if xgbr2_accuracy > 0.54:
-#     print 'xgbr 2'
-#     print xgbr2_accuracy
-# # if xgbr5_accuracy > 0.54:
-#     print 'xgbr 5'
-#     print xgbr5_accuracy
-# # if xgbr10_accuracy > 0.54:
-#     print 'xgbr 10'
-#     print xgbr10_accuracy
-# # if xgbr15_accuracy > 0.54:
-#     print 'xgbr 15'
-#     print xgbr15_accuracy
-# # if xgbr5_r_accuracy > 0.54:
-#     print 'xgbr 5r'
-#     print xgbr5_r_accuracy
-# # if xgbr10_r_accuracy > 0.54:
-#     print 'xgbr 10r'
-#     print xgbr10_r_accuracy
-# # if xgbr15_r_accuracy > 0.54:
-#     print 'xgbr 15r'
-#     print xgbr15_r_accuracy
-# # if mlp2_accuracy > 0.54:
-#     print 'mlp 2'
-#     print mlp2_accuracy
-# if mlp5_accuracy > 0.54:
-    print 'mlp 5'
-    print mlp5_accuracy
-# # if mlp10_accuracy > 0.54:
-#     print 'mlp 10'
-#     print mlp10_accuracy
-# # if mlp15_accuracy > 0.54:
-#     print 'mlp 15'
-#     print mlp15_accuracy
-# # if mlp5_r_accuracy > 0.54:
-#     print 'mlp 5r'
-#     print mlp5_r_accuracy
-# # if mlp10_r_accuracy > 0.54:
-#     print 'mlp 10r'
-#     print mlp10_r_accuracy
-# # if mlp15_r_accuracy > 0.54:
-#     print 'mlp 15r'
-#     print mlp15_r_accuracy
-# # if mlpr2_accuracy > 0.54:
-#     print 'mlpr 2'
-#     print mlpr2_accuracy
-# if mlpr5_accuracy > 0.54:
-    print 'mlpr 5'
-    print mlpr5_accuracy
-# # if mlpr10_accuracy > 0.54:
-#     print 'mlpr 10'
-#     print mlpr10_accuracy
-# # if mlpr15_accuracy > 0.54:
-#     print 'mlpr 15'
-#     print mlpr15_accuracy
-# # if mlpr5_r_accuracy > 0.54:
-#     print 'mlpr 5r'
-#     print mlp5_r_accuracy
-# # if mlpr10_r_accuracy > 0.54:
-#     print 'mlpr 10r'
-#     print mlp10_r_accuracy
-# # if mlpr15_r_accuracy > 0.54:
-#     print 'mlpr 15r'
-#     print mlp15_r_accuracy
-# # if gbc2_accuracy > 0.54:
-#     print 'gbc 2'
-#     print gbc2_accuracy
-# # if gbc5_accuracy > 0.54:
-#     print 'gbc 5'
-#     print gbc5_accuracy
-# # if gbc10_accuracy > 0.54:
-#     print 'gbc 10'
-#     print gbc10_accuracy
-# # if gbc15_accuracy > 0.54:
-#     print 'gbc 15'
-#     print gbc15_accuracy
-# # if gbc5_r_accuracy > 0.54:
-#     print 'gbc 5r'
-#     print gbc5_r_accuracy
-# # if gbc10_r_accuracy > 0.54:
-#     print 'gbc 10r'
-#     print gbc10_r_accuracy
-# # if gbc15_r_accuracy > 0.54:
-#     print 'gbc 15r'
-#     print gbc15_r_accuracy
+    # SVM Classifier results
+    svm2_accuracy = kfold_svm(df_final2)
+    svm5_accuracy = kfold_svm(df_final5)
+    svm10_accuracy = kfold_svm(df_final10)
+    svm15_accuracy = kfold_svm(df_final15)
+    svm5_r_accuracy = kfold_svm(df_final5_r)
+    svm10_r_accuracy = kfold_svm(df_final10_r)
+    svm15_r_accuracy = kfold_svm(df_final15_r)
+    # SVM Regressor results
+    svmr2_accuracy = kfold_svmr(df_final2)
+    svmr5_accuracy = kfold_svmr(df_final5)
+    svmr10_accuracy = kfold_svmr(df_final10)
+    svmr15_accuracy = kfold_svmr(df_final15)
+    svmr5_r_accuracy = kfold_svmr(df_final5_r)
+    svmr10_r_accuracy = kfold_svmr(df_final10_r)
+    svmr15_r_accuracy = kfold_svmr(df_final15_r)
+
+    # Naive Bayes results
+    nb2_accuracy = kfold_nb(df_final2)
+    nb5_accuracy = kfold_nb(df_final5)
+    nb10_accuracy = kfold_nb(df_final10)
+    nb15_accuracy = kfold_nb(df_final15)

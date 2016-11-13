@@ -5,7 +5,7 @@ import numpy as np
 import cPickle as pk
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPRegressor
 from sklearn.cross_validation import KFold
 
 def kfold_mlpr(df_final):
@@ -26,7 +26,7 @@ def kfold_mlpr(df_final):
     kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
     index = 0
     accuracy = np.empty(5)
-    model = MLPClassifier(solver = 'lbfgs', alpha = 2.0091e-5, hidden_layer_sizes = (5,2), \
+    model = MLPRegressor(solver = 'lbfgs', alpha = 2.0091e-5, hidden_layer_sizes = (5,2), \
     activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
     for train, test in kf:
         scaler = StandardScaler()
@@ -131,7 +131,7 @@ if __name__ == '__main__':
     # only change team names and date
 
     # gets model and accuracy of model
-    mlp, mlp_accuracy = kfold_mlpr(df_final5_LS)
+    mlpr, mlpr_accuracy = kfold_mlpr(df_final5_LS)
 
     # pickles model
     pickle_model(mlp, filename = 'mlpr_classifier_model.pk')
