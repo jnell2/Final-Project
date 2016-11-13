@@ -96,6 +96,7 @@ def unpickle_and_predict(df_final, filename='mlp_classifier_model.pk'):
     returns predictions
     '''
     model = pk.load(open(filename))
+
     df = df_final.copy()
     y1 = df.pop('home_team_win')
     # variable 1 to predict
@@ -104,6 +105,10 @@ def unpickle_and_predict(df_final, filename='mlp_classifier_model.pk'):
     df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
     # we don't want any categorical variables in the model
     X = df.values
+
+    scaler = StandardScaler()
+    scaler.fit(X)
+    X = scaler.transform(X)
     predictions = model.predict(X)
     return predictions
 
@@ -131,3 +136,16 @@ if __name__ == '__main__':
 
     # unpickle model and get predictions
     predictions = unpickle_and_predict(df_final5_new, filename = 'mlp_classifier_model.pk')
+
+    # append predictions to df_final5_new and drop all columns that we don't care about
+    df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]
+    preds = pd.DataFrame(predictions)
+    preds.columns = [['prediction']]
+    final = pd.merge(df_final, preds, how = 'left', left_index = True, right_index = True)
+    final.sort_values('date', ascending = False, inplace = True)
+    # most recent games will be at the top
+
+    # if you want to know the accuracy of the current season predictions:
+    # keep in mind, all of the "actual" values for future games is -100
+    # so those will bring down the accuracy
+    new_accuracy = accuracy_score(final['home_team_win'], final['prediction'])
