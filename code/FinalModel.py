@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
 from sklearn.cross_validation import KFold
 
-def kfold_mlp(df_final):
+def kfold_mlpr(df_final):
     '''
     pass in df_final dataframe
     function performs KFold cross validation, fits model
@@ -26,15 +26,16 @@ def kfold_mlp(df_final):
     kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
     index = 0
     accuracy = np.empty(5)
-    model = MLPClassifier(solver = 'lbfgs', alpha = 2.039e-5, hidden_layer_sizes = (5,2), \
+    model = MLPClassifier(solver = 'lbfgs', alpha = 2.0091e-5, hidden_layer_sizes = (5,2), \
     activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
     for train, test in kf:
         scaler = StandardScaler()
         scaler.fit(X[train])
         X[train] = scaler.transform(X[train])
         X[test] = scaler.transform(X[test])
-        model.fit(X[train], y1[train])
+        model.fit(X[train], y2[train])
         pred = model.predict(X[test])
+        pred = map(lambda x: 1 if x > 0 else 0, pred)
         accuracy[index] = accuracy_score(y1[test], pred)
         index += 1
 
@@ -89,7 +90,7 @@ def pickle_model(model, filename = 'mlp_classifier_model.pk'):
     '''
     pk.dump(model, open(filename, 'w'), 2)
 
-def unpickle_and_predict(df_final, filename='mlp_classifier_model.pk'):
+def unpickle_and_predict(df_final, filename='mlpr_classifier_model.pk'):
     '''
     pass in the dataframe that you want to predict on
     function unpickles the model
@@ -110,6 +111,7 @@ def unpickle_and_predict(df_final, filename='mlp_classifier_model.pk'):
     scaler.fit(X)
     X = scaler.transform(X)
     predictions = model.predict(X)
+    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
     return predictions
 
 if __name__ == '__main__':
@@ -129,13 +131,13 @@ if __name__ == '__main__':
     # only change team names and date
 
     # gets model and accuracy of model
-    mlp, mlp_accuracy = kfold_mlp(df_final5_LS)
+    mlp, mlp_accuracy = kfold_mlpr(df_final5_LS)
 
     # pickles model
-    pickle_model(mlp, filename = 'mlp_classifier_model.pk')
+    pickle_model(mlp, filename = 'mlpr_classifier_model.pk')
 
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final5_new, filename = 'mlp_classifier_model.pk')
+    predictions = unpickle_and_predict(df_final5_new, filename = 'mlpr_classifier_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
     df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]

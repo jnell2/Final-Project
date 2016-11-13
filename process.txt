@@ -166,3 +166,10 @@ next steps:
 3) write function that makes predictions
 
 MAKING PREDICTIONS!!!!
+
+Day 13:
+11/13/2016
+optimizing mlp classifier and regressor. new best model is mlp regressor.
+when training on last seasons data, accuracy is 57.23%.
+mlp classifier is 57.19%.
+today, will work on visualizations and putting together presentation. 

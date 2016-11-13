@@ -363,7 +363,7 @@ def kfold_mlp(df_final):
     kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
     index = 0
     accuracy = np.empty(5)
-    model = MLPClassifier(solver = 'lbfgs', alpha = 2.039e-5, hidden_layer_sizes = (5,2), \
+    model = MLPClassifier(solver = 'lbfgs', alpha = 0.001100009, hidden_layer_sizes = (5,2), \
     activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
     for train, test in kf:
         scaler = StandardScaler()
@@ -395,7 +395,7 @@ def kfold_mlpr(df_final):
     kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
     index = 0
     accuracy = np.empty(5)
-    model = MLPRegressor(solver = 'lbfgs', alpha = 1.9007e-5, hidden_layer_sizes = (5,2), \
+    model = MLPRegressor(solver = 'lbfgs', alpha = 2.0091e-5, hidden_layer_sizes = (5,2), \
     activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
     for train, test in kf:
         scaler = StandardScaler()
@@ -441,6 +441,7 @@ if __name__ == '__main__':
 
     # this gets the most recent final csv files
     # if you want up-to-date information, re-run DataCleaning.py
+    # REMEMBER WE ARE TRAINING OUR MODEL ON LAST SEASONS DATA
     df_final2 = pd.read_csv('data/final2LS.csv')
     df_final2.drop(['Unnamed: 0'], axis = 1, inplace = True)
     df_final5 = pd.read_csv('data/final5LS.csv')
@@ -789,48 +790,48 @@ if __name__ == '__main__':
 # # if xgbr15_r_accuracy > 0.54:
 #     print 'xgbr 15r'
 #     print xgbr15_r_accuracy
-# if mlp2_accuracy > 0.54:
-    print 'mlp 2'
-    print mlp2_accuracy
+# # if mlp2_accuracy > 0.54:
+#     print 'mlp 2'
+#     print mlp2_accuracy
 # if mlp5_accuracy > 0.54:
     print 'mlp 5'
     print mlp5_accuracy
-# if mlp10_accuracy > 0.54:
-    print 'mlp 10'
-    print mlp10_accuracy
-# if mlp15_accuracy > 0.54:
-    print 'mlp 15'
-    print mlp15_accuracy
-# if mlp5_r_accuracy > 0.54:
-    print 'mlp 5r'
-    print mlp5_r_accuracy
-# if mlp10_r_accuracy > 0.54:
-    print 'mlp 10r'
-    print mlp10_r_accuracy
-# if mlp15_r_accuracy > 0.54:
-    print 'mlp 15r'
-    print mlp15_r_accuracy
-# if mlpr2_accuracy > 0.54:
-    print 'mlpr 2'
-    print mlpr2_accuracy
+# # if mlp10_accuracy > 0.54:
+#     print 'mlp 10'
+#     print mlp10_accuracy
+# # if mlp15_accuracy > 0.54:
+#     print 'mlp 15'
+#     print mlp15_accuracy
+# # if mlp5_r_accuracy > 0.54:
+#     print 'mlp 5r'
+#     print mlp5_r_accuracy
+# # if mlp10_r_accuracy > 0.54:
+#     print 'mlp 10r'
+#     print mlp10_r_accuracy
+# # if mlp15_r_accuracy > 0.54:
+#     print 'mlp 15r'
+#     print mlp15_r_accuracy
+# # if mlpr2_accuracy > 0.54:
+#     print 'mlpr 2'
+#     print mlpr2_accuracy
 # if mlpr5_accuracy > 0.54:
     print 'mlpr 5'
     print mlpr5_accuracy
-# if mlpr10_accuracy > 0.54:
-    print 'mlpr 10'
-    print mlpr10_accuracy
-# if mlpr15_accuracy > 0.54:
-    print 'mlpr 15'
-    print mlpr15_accuracy
-# if mlpr5_r_accuracy > 0.54:
-    print 'mlpr 5r'
-    print mlp5_r_accuracy
-# if mlpr10_r_accuracy > 0.54:
-    print 'mlpr 10r'
-    print mlp10_r_accuracy
-# if mlpr15_r_accuracy > 0.54:
-    print 'mlpr 15r'
-    print mlp15_r_accuracy
+# # if mlpr10_accuracy > 0.54:
+#     print 'mlpr 10'
+#     print mlpr10_accuracy
+# # if mlpr15_accuracy > 0.54:
+#     print 'mlpr 15'
+#     print mlpr15_accuracy
+# # if mlpr5_r_accuracy > 0.54:
+#     print 'mlpr 5r'
+#     print mlp5_r_accuracy
+# # if mlpr10_r_accuracy > 0.54:
+#     print 'mlpr 10r'
+#     print mlp10_r_accuracy
+# # if mlpr15_r_accuracy > 0.54:
+#     print 'mlpr 15r'
+#     print mlp15_r_accuracy
 # # if gbc2_accuracy > 0.54:
 #     print 'gbc 2'
 #     print gbc2_accuracy
