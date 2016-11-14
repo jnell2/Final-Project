@@ -168,7 +168,7 @@ def get_data():
     # df_dp = Date_Penalties_loop(Date_Penalties_url, num_pages)
     # df_ds = Date_Shots_loop(Date_Shots_url, num_pages)
 
-    num_pages = 9
+    num_pages = 10
 
     df_dts = Date_TS_loop(Date_TeamSummary_url, num_pages)
     df_dp = Date_Penalties_loop(Date_Penalties_url, num_pages)

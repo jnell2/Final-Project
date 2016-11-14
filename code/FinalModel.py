@@ -126,12 +126,6 @@ if __name__ == '__main__':
 
     # if you want to know new games, this appends rows to past games to make 1 big df
     df_all, df_games = get_data()
-    df_games, df_final5_new = add_rows(df_all, df_games, 'COL', 'BOS', '2016-11-13')
-    df_games, df_final5_new = add_rows(df_all, df_games, 'CHI', 'MTL', '2016-11-13')
-    df_games, df_final5_new = add_rows(df_all, df_games, 'EDM', 'NYR', '2016-11-13')
-    df_games, df_final5_new = add_rows(df_all, df_games, 'WPG', 'LAK', '2016-11-13')
-    df_games, df_final5_new = add_rows(df_all, df_games, 'VAN', 'DAL', '2016-11-13')
-    df_games, df_final5_new = add_rows(df_all, df_games, 'OTT', 'MIN', '2016-11-13')
     df_games, df_final5_new = add_rows(df_all, df_games, 'NYI', 'TBL', '2016-11-14')
     # every time you want to add a new row, copy this exact line and
     # only change team names and date

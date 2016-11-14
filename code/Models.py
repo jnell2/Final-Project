@@ -115,7 +115,7 @@ def kfold_lasso(df_final):
     kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
     index = 0
     accuracy = np.empty(5)
-    model = Lasso(alpha = 0.0001, fit_intercept = False, normalize = True)
+    model = Lasso(alpha = 0.0119, random_state = 2, fit_intercept = True)
     for train, test in kf:
         model.fit(X[train], y2[train])
         pred = model.predict(X[test])
@@ -143,7 +143,7 @@ def kfold_ridge(df_final):
     kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
     index = 0
     accuracy = np.empty(5)
-    model = Ridge(alpha = 0.0001, fit_intercept = False, normalize = True)
+    model = Ridge(alpha = 15, fit_intercept = True, random_state = 2)
     for train, test in kf:
         model.fit(X[train], y2[train])
         pred = model.predict(X[test])
@@ -725,3 +725,9 @@ if __name__ == '__main__':
     # nb5_accuracy = kfold_nb(df_final5)
     # nb10_accuracy = kfold_nb(df_final10)
     # nb15_accuracy = kfold_nb(df_final15)
+
+
+    print 'MLP 5'
+    print mlp5_accuracy
+    print 'MLPr 5'
+    print mlpr5_accuracy
