@@ -686,42 +686,42 @@ if __name__ == '__main__':
     mlpr10_r_accuracy = kfold_mlpr(df_final10_r)
     mlpr15_r_accuracy = kfold_mlpr(df_final15_r)
 
-    # Gradient Boosting Classifier results
-    gbc2_accuracy = kfold_gbc(df_final2)
-    gbc5_accuracy = kfold_gbc(df_final5)
-    gbc10_accuracy = kfold_gbc(df_final10)
-    gbc15_accuracy = kfold_gbc(df_final15)
-    gbc5_r_accuracy = kfold_gbc(df_final5_r)
-    gbc10_r_accuracy = kfold_gbc(df_final10_r)
-    gbc15_r_accuracy = kfold_gbc(df_final15_r)
-    # Gradient Boosting Regressor results
-    gbr2_accuracy = kfold_gbr(df_final2)
-    gbr5_accuracy = kfold_gbr(df_final5)
-    gbr10_accuracy = kfold_gbr(df_final10)
-    gbr15_accuracy = kfold_gbr(df_final15)
-    gbr5_r_accuracy = kfold_gbr(df_final5_r)
-    gbr10_r_accuracy = kfold_gbr(df_final10_r)
-    gbr15_r_accuracy = kfold_gbr(df_final15_r)
-
-    # SVM Classifier results
-    svm2_accuracy = kfold_svm(df_final2)
-    svm5_accuracy = kfold_svm(df_final5)
-    svm10_accuracy = kfold_svm(df_final10)
-    svm15_accuracy = kfold_svm(df_final15)
-    svm5_r_accuracy = kfold_svm(df_final5_r)
-    svm10_r_accuracy = kfold_svm(df_final10_r)
-    svm15_r_accuracy = kfold_svm(df_final15_r)
-    # SVM Regressor results
-    svmr2_accuracy = kfold_svmr(df_final2)
-    svmr5_accuracy = kfold_svmr(df_final5)
-    svmr10_accuracy = kfold_svmr(df_final10)
-    svmr15_accuracy = kfold_svmr(df_final15)
-    svmr5_r_accuracy = kfold_svmr(df_final5_r)
-    svmr10_r_accuracy = kfold_svmr(df_final10_r)
-    svmr15_r_accuracy = kfold_svmr(df_final15_r)
-
-    # Naive Bayes results
-    nb2_accuracy = kfold_nb(df_final2)
-    nb5_accuracy = kfold_nb(df_final5)
-    nb10_accuracy = kfold_nb(df_final10)
-    nb15_accuracy = kfold_nb(df_final15)
+    # # Gradient Boosting Classifier results
+    # gbc2_accuracy = kfold_gbc(df_final2)
+    # gbc5_accuracy = kfold_gbc(df_final5)
+    # gbc10_accuracy = kfold_gbc(df_final10)
+    # gbc15_accuracy = kfold_gbc(df_final15)
+    # gbc5_r_accuracy = kfold_gbc(df_final5_r)
+    # gbc10_r_accuracy = kfold_gbc(df_final10_r)
+    # gbc15_r_accuracy = kfold_gbc(df_final15_r)
+    # # Gradient Boosting Regressor results
+    # gbr2_accuracy = kfold_gbr(df_final2)
+    # gbr5_accuracy = kfold_gbr(df_final5)
+    # gbr10_accuracy = kfold_gbr(df_final10)
+    # gbr15_accuracy = kfold_gbr(df_final15)
+    # gbr5_r_accuracy = kfold_gbr(df_final5_r)
+    # gbr10_r_accuracy = kfold_gbr(df_final10_r)
+    # gbr15_r_accuracy = kfold_gbr(df_final15_r)
+    #
+    # # SVM Classifier results
+    # svm2_accuracy = kfold_svm(df_final2)
+    # svm5_accuracy = kfold_svm(df_final5)
+    # svm10_accuracy = kfold_svm(df_final10)
+    # svm15_accuracy = kfold_svm(df_final15)
+    # svm5_r_accuracy = kfold_svm(df_final5_r)
+    # svm10_r_accuracy = kfold_svm(df_final10_r)
+    # svm15_r_accuracy = kfold_svm(df_final15_r)
+    # # SVM Regressor results
+    # svmr2_accuracy = kfold_svmr(df_final2)
+    # svmr5_accuracy = kfold_svmr(df_final5)
+    # svmr10_accuracy = kfold_svmr(df_final10)
+    # svmr15_accuracy = kfold_svmr(df_final15)
+    # svmr5_r_accuracy = kfold_svmr(df_final5_r)
+    # svmr10_r_accuracy = kfold_svmr(df_final10_r)
+    # svmr15_r_accuracy = kfold_svmr(df_final15_r)
+    #
+    # # Naive Bayes results
+    # nb2_accuracy = kfold_nb(df_final2)
+    # nb5_accuracy = kfold_nb(df_final5)
+    # nb10_accuracy = kfold_nb(df_final10)
+    # nb15_accuracy = kfold_nb(df_final15)
