@@ -126,7 +126,13 @@ if __name__ == '__main__':
 
     # if you want to know new games, this appends rows to past games to make 1 big df
     df_all, df_games = get_data()
-    df_games, df_final5_new = add_rows(df_all, df_games, 'COL', 'CHI', '2016-11-20')
+    df_games, df_final5_new = add_rows(df_all, df_games, 'COL', 'BOS', '2016-11-13')
+    df_games, df_final5_new = add_rows(df_all, df_games, 'CHI', 'MTL', '2016-11-13')
+    df_games, df_final5_new = add_rows(df_all, df_games, 'EDM', 'NYR', '2016-11-13')
+    df_games, df_final5_new = add_rows(df_all, df_games, 'WPG', 'LAK', '2016-11-13')
+    df_games, df_final5_new = add_rows(df_all, df_games, 'VAN', 'DAL', '2016-11-13')
+    df_games, df_final5_new = add_rows(df_all, df_games, 'OTT', 'MIN', '2016-11-13')
+    df_games, df_final5_new = add_rows(df_all, df_games, 'NYI', 'TBL', '2016-11-14')
     # every time you want to add a new row, copy this exact line and
     # only change team names and date
 
@@ -134,7 +140,7 @@ if __name__ == '__main__':
     mlpr, mlpr_accuracy = kfold_mlpr(df_final5_LS)
 
     # pickles model
-    pickle_model(mlp, filename = 'mlpr_classifier_model.pk')
+    pickle_model(mlpr, filename = 'mlpr_classifier_model.pk')
 
     # unpickle model and get predictions
     predictions = unpickle_and_predict(df_final5_new, filename = 'mlpr_classifier_model.pk')
@@ -145,6 +151,7 @@ if __name__ == '__main__':
     preds.columns = [['prediction']]
     final = pd.merge(df_final, preds, how = 'left', left_index = True, right_index = True)
     final.sort_values('date', ascending = False, inplace = True)
+    final = final.reset_index(drop=True)
     # most recent games will be at the top
 
     # if you want to know the accuracy of the current season predictions:
