@@ -5,7 +5,7 @@ import numpy as np
 import cPickle as pk
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.neural_network import MLPRegressor
+from sklearn.neural_network import MLPRegressor, MLPClassifier
 from sklearn.cross_validation import KFold
 
 def kfold_mlpr(df_final):
@@ -104,12 +104,12 @@ def unpickle_and_predict(df_final, filename='mlpr_regressor_model.pk'):
     predictions = map(lambda x: 1 if x > 0 else 0, predictions)
     return predictions
 
-def cumulative_accuracy(df_final_LS, filename = 'mlpr_regressor_model.pk'):
+def cumulative_accuracy(df_final_LS, filename='mlpr_regressor_model.pk'):
     '''
     takes in last season dataframe and pickled model you want to visualize
     return a dataframe with cumulative average over time
     '''
-    predictions = unpickle_and_predict(df_final5_LS, filename)
+    predictions = unpickle_and_predict(df_final_LS, filename)
     df_final = df_final5_LS[['home_team', 'away_team', 'date', 'home_team_win']]
     preds = pd.DataFrame(predictions)
     preds.columns = [['prediction']]
@@ -129,11 +129,12 @@ if __name__ == '__main__':
 
     # gets models and accuracy of models
     mlpr, mlpr_accuracy = kfold_mlpr(df_final5_LS)
-    mlp, mlp_accuracy = kfold_mlp(df_final5_LS)
+    mlp, mlp_accuracy= kfold_mlp(df_final5_LS)
 
     # pickles models
-    pickle_model(mlpr, filename = 'mlpr_classifier_model.pk')
+    pickle_model(mlpr, filename = 'mlpr_regressor_model.pk')
     pickle_model(mlp, filename = 'mlp_classifier_model.pk')
 
     # unpickle model, get predictions, and return df with cumulative average accuracy
     df_mlpr = cumulative_accuracy(df_final5_LS, filename = 'mlpr_regressor_model.pk')
+    df_mlp = cumulative_accuracy(df_final5_LS, filename = 'mlp_classifier_model.pk')
