@@ -83,14 +83,14 @@ def add_rows(df_all, df_games, home_team, away_team, date):
 
     return df_games, df_final5
 
-def pickle_model(model, filename = 'mlp_classifier_model.pk'):
+def pickle_model(model, filename = 'mlp_regressor_model.pk'):
     '''
     pass in model that you would like to pickle and filename you would like to use
     will return pickled model
     '''
     pk.dump(model, open(filename, 'w'), 2)
 
-def unpickle_and_predict(df_final, filename='mlpr_classifier_model.pk'):
+def unpickle_and_predict(df_final, filename='mlpr_regressor_model.pk'):
     '''
     pass in the dataframe that you want to predict on
     function unpickles the model
@@ -134,10 +134,10 @@ if __name__ == '__main__':
     mlpr, mlpr_accuracy = kfold_mlpr(df_final5_LS)
 
     # pickles model
-    pickle_model(mlpr, filename = 'mlpr_classifier_model.pk')
+    pickle_model(mlpr, filename = 'mlpr_regressor_model.pk')
 
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final5_new, filename = 'mlpr_classifier_model.pk')
+    predictions = unpickle_and_predict(df_final5_new, filename = 'mlpr_regressor_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
     df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]
