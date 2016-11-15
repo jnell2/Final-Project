@@ -148,3 +148,6 @@ if __name__ == '__main__':
     finalLS['cumulative_average'] = pd.expanding_mean(finalLS['match'], 1)
     # these results match what was found in ModelVisualization.py
     # 80.1% accuracy
+
+    final.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final_XGBC.csv')
+    finalLS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/finalLS_XGBC.csv')
