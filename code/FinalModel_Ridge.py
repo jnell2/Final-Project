@@ -4,10 +4,9 @@ import DataCleaning as dc
 import pandas as pd
 import numpy as np
 import cPickle as pk
-from sklearn.preprocessing import StandardScaler
-from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import ElasticNet, Lasso, Ridge
 
-def mlp(df_final):
+def ridge(df_final):
     '''
     pass in df_final dataframe
     function fits model
@@ -21,14 +20,11 @@ def mlp(df_final):
     # we don't want any categorical variables in the model
     X = df.values
 
-    model = MLPClassifier(solver = 'lbfgs', alpha = 0.001100009, hidden_layer_sizes = (5,2), \
-    activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
+    model = Ridge(alpha = 15, fit_intercept = False, random_state = 2)
 
-    scaler = StandardScaler()
-    scaler.fit(X)
-    X = scaler.transform(X)
-    model.fit(X, y1)
+    model.fit(X, y2)
     predictions = model.predict(X)
+    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
 
     return model, predictions
 
@@ -69,7 +65,7 @@ def add_rows(df_all, df_games, home_team, away_team, date):
 
     df_games = df_games.append(df, ignore_index = True)
 
-    df_final5 = dc.cumulative_stats(df_all, df_games, 5)
+    df_final5 = dc.cumulative_stats(df_all, df_games, 10)
     df_final5.drop(['home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
     return df_games, df_final5
@@ -99,35 +95,35 @@ def unpickle_and_predict(df_final, filename):
     X = df.values
 
     predictions = model.predict(X)
+    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
     return predictions
 
 if __name__ == '__main__':
 
     # read in data to train model
-    df_final5_LS = pd.read_csv('data/final5LS.csv')
-    df_final5_LS.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
+    df_final10_LS = pd.read_csv('data/final10LS.csv')
+    df_final10_LS.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
     # gets data that we want to predict on, if don't want to add new rows (past games)
-    df_final5 = pd.read_csv('data/final5.csv')
-    df_final5.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
+    df_final10 = pd.read_csv('data/final10.csv')
+    df_final10.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
     # if you want to know new games, this appends rows to past games to make 1 big df
     df_all, df_games = get_data()
-    df_games, df_final5_new = add_rows(df_all, df_games, 'NYI', 'TBL', '2016-11-14')
+    df_games, df_final10_new = add_rows(df_all, df_games, 'NYI', 'TBL', '2016-11-14')
     # every time you want to add a new row, copy this exact line and
     # only change team names and date
 
     # gets model
-    mlp, predictionsLS = mlp(df_final5_LS)
+    ridge, predictionsLS = ridge(df_final10_LS)
 
     # pickles model
-    pickle_model(mlp, filename = 'mlp_classifier_model.pk')
-
+    pickle_model(ridge, filename = 'ridge_model.pk')
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final5_new, filename = 'mlp_classifier_model.pk')
+    predictions = unpickle_and_predict(df_final10_new, filename = 'ridge_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
-    df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]
+    df_final = df_final10_new[['home_team', 'away_team', 'date', 'home_team_win']]
     preds = pd.DataFrame(predictions)
     preds.columns = [['prediction']]
     final = pd.merge(df_final, preds, how = 'left', left_index = True, right_index = True)
@@ -139,7 +135,7 @@ if __name__ == '__main__':
     # 58.8% accuracy
 
     # last season
-    df_finalLS = df_final5_LS[['home_team', 'away_team', 'date', 'home_team_win']]
+    df_finalLS = df_final10_LS[['home_team', 'away_team', 'date', 'home_team_win']]
     predsLS = pd.DataFrame(predictionsLS)
     predsLS.columns = [['prediction']]
     finalLS = pd.merge(df_finalLS, predsLS, how = 'left', left_index = True, right_index = True)
@@ -148,4 +144,4 @@ if __name__ == '__main__':
     finalLS['match'] = np.where(finalLS['home_team_win'] == finalLS['prediction'], 1, 0)
     finalLS['cumulative_average'] = pd.expanding_mean(finalLS['match'], 1)
     # these results don't match what was found in ModelVisualization.py
-    # 65.8% accuracy
+    # 57.6% accuracy

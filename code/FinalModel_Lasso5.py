@@ -4,10 +4,9 @@ import DataCleaning as dc
 import pandas as pd
 import numpy as np
 import cPickle as pk
-from sklearn.preprocessing import StandardScaler
-from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import ElasticNet, Lasso, Ridge
 
-def mlp(df_final):
+def lasso(df_final):
     '''
     pass in df_final dataframe
     function fits model
@@ -21,14 +20,11 @@ def mlp(df_final):
     # we don't want any categorical variables in the model
     X = df.values
 
-    model = MLPClassifier(solver = 'lbfgs', alpha = 0.001100009, hidden_layer_sizes = (5,2), \
-    activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
+    model = Lasso(alpha = 0.0119, random_state = 2, fit_intercept = False)
 
-    scaler = StandardScaler()
-    scaler.fit(X)
-    X = scaler.transform(X)
-    model.fit(X, y1)
+    model.fit(X, y2)
     predictions = model.predict(X)
+    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
 
     return model, predictions
 
@@ -99,6 +95,7 @@ def unpickle_and_predict(df_final, filename):
     X = df.values
 
     predictions = model.predict(X)
+    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
     return predictions
 
 if __name__ == '__main__':
@@ -118,13 +115,12 @@ if __name__ == '__main__':
     # only change team names and date
 
     # gets model
-    mlp, predictionsLS = mlp(df_final5_LS)
+    lasso, predictionsLS = lasso(df_final5_LS)
 
     # pickles model
-    pickle_model(mlp, filename = 'mlp_classifier_model.pk')
-
+    pickle_model(lasso, filename = 'lasso5_model.pk')
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final5_new, filename = 'mlp_classifier_model.pk')
+    predictions = unpickle_and_predict(df_final5_new, filename = 'lasso5_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
     df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]
@@ -136,7 +132,7 @@ if __name__ == '__main__':
     final['match'] = np.where(final['home_team_win'] == final['prediction'], 1, 0)
     final['cumulative_average'] = pd.expanding_mean(final['match'], 1)
     # most recent games will be at the bottom
-    # 58.8% accuracy
+    # 56.8% accuracy
 
     # last season
     df_finalLS = df_final5_LS[['home_team', 'away_team', 'date', 'home_team_win']]
@@ -148,4 +144,4 @@ if __name__ == '__main__':
     finalLS['match'] = np.where(finalLS['home_team_win'] == finalLS['prediction'], 1, 0)
     finalLS['cumulative_average'] = pd.expanding_mean(finalLS['match'], 1)
     # these results don't match what was found in ModelVisualization.py
-    # 65.8% accuracy
+    # 55.7% accuracy

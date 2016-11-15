@@ -28,8 +28,10 @@ def mlpr(df_final):
     scaler.fit(X)
     X= scaler.transform(X)
     model.fit(X, y2)
+    predictions = model.predict(X)
+    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
 
-    return model
+    return model, predictions
 
 def get_data():
     '''
@@ -118,14 +120,13 @@ if __name__ == '__main__':
     # only change team names and date
 
     # gets model
-    mlpr = mlpr(df_final5_LS)
+    mlpr, predictionsLS = mlpr(df_final5_LS)
 
     # pickles model
-    pickle_model(mlpr, filename = 'mlpr_classifier_model.pk')
+    pickle_model(mlpr, filename = 'mlp_regressor_model.pk')
 
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final5_new, filename = 'mlpr_classifier_model.pk')
-    predictionsLS = unpickle_and_predict(df_final5_LS, filename = 'mlpr_classifier_model.pk')
+    predictions = unpickle_and_predict(df_final5_new, filename = 'mlp_regressor_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
     df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]
@@ -137,7 +138,7 @@ if __name__ == '__main__':
     final['match'] = np.where(final['home_team_win'] == final['prediction'], 1, 0)
     final['cumulative_average'] = pd.expanding_mean(final['match'], 1)
     # most recent games will be at the bottom
-    # 59.5% accuracy
+    # 59.8% accuracy
 
     # last season
     df_finalLS = df_final5_LS[['home_team', 'away_team', 'date', 'home_team_win']]
@@ -149,4 +150,4 @@ if __name__ == '__main__':
     finalLS['match'] = np.where(finalLS['home_team_win'] == finalLS['prediction'], 1, 0)
     finalLS['cumulative_average'] = pd.expanding_mean(finalLS['match'], 1)
     # these results don't match what was found in ModelVisualization.py
-    # 53.6% accuracy
+    # 62.3% accuracy
