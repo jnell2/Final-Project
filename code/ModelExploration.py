@@ -584,90 +584,90 @@ if __name__ == '__main__':
     # 1) home team W/L
     # 2) spread
 
-    # # Logistic Regression results
-    # logistic2_accuracy = kfold_logistic(df_final2)
-    # logistic5_accuracy = kfold_logistic(df_final5)
-    # logistic10_accuracy = kfold_logistic(df_final10)
-    # logistic15_accuracy = kfold_logistic(df_final15)
-    # logistic5_r_accuracy = kfold_logistic(df_final5_r)
-    # logistic10_r_accuracy = kfold_logistic(df_final10_r)
-    # logistic15_r_accuracy = kfold_logistic(df_final15_r)
-    #
-    # # Linear Regression results
-    # # Lasso
-    # lasso2_accuracy = kfold_lasso(df_final2)
-    # lasso5_accuracy = kfold_lasso(df_final5)
-    # lasso10_accuracy = kfold_lasso(df_final10)
-    # lasso15_accuracy = kfold_lasso(df_final15)
-    # lasso5_r_accuracy = kfold_lasso(df_final5_r)
-    # lasso10_r_accuracy = kfold_lasso(df_final10_r)
-    # lasso15_r_accuracy = kfold_lasso(df_final15_r)
-    # # Ridge
-    # ridge2_accuracy = kfold_ridge(df_final2)
-    # ridge5_accuracy = kfold_ridge(df_final5)
-    # ridge10_accuracy = kfold_ridge(df_final10)
-    # ridge15_accuracy = kfold_ridge(df_final15)
-    # ridge5_r_accuracy = kfold_ridge(df_final5_r)
-    # ridge10_r_accuracy = kfold_ridge(df_final10_r)
-    # ridge15_r_accuracy = kfold_ridge(df_final15_r)
-    # # Elastic Net
-    # elastic2_accuracy = kfold_elastic(df_final2)
-    # elastic5_accuracy = kfold_elastic(df_final5)
-    # elastic10_accuracy = kfold_elastic(df_final10)
-    # elastic15_accuracy = kfold_elastic(df_final15)
-    # elastic5_r_accuracy = kfold_elastic(df_final5_r)
-    # elastic10_r_accuracy = kfold_elastic(df_final10_r)
-    # elastic15_r_accuracy = kfold_elastic(df_final15_r)
-    # # Linear Regression
-    # linear2_accuracy = kfold_linear(df_final2)
-    # linear5_accuracy = kfold_linear(df_final5)
-    # linear10_accuracy = kfold_linear(df_final10)
-    # linear15_accuracy = kfold_linear(df_final15)
-    # linear5_r_accuracy = kfold_linear(df_final5_r)
-    # linear10_r_accuracy = kfold_linear(df_final10_r)
-    # linear15_r_accuracy = kfold_linear(df_final15_r)
-    # # SGD Regressor
-    # sgd2_accuracy = kfold_sgd(df_final2)
-    # sgd5_accuracy = kfold_sgd(df_final5)
-    # sgd10_accuracy = kfold_sgd(df_final10)
-    # sgd15_accuracy = kfold_sgd(df_final15)
-    # sgd5_r_accuracy = kfold_sgd(df_final5_r)
-    # sgd10_r_accuracy = kfold_sgd(df_final10_r)
-    # sgd15_r_accuracy = kfold_sgd(df_final15_r)
-    #
-    # # Random Forest Classifier results
-    # rfc2_accuracy = kfold_rfc(df_final2)
-    # rfc5_accuracy = kfold_rfc(df_final5)
-    # rfc10_accuracy = kfold_rfc(df_final10)
-    # rfc15_accuracy = kfold_rfc(df_final15)
-    # rfc5_r_accuracy = kfold_rfc(df_final5_r)
-    # rfc10_r_accuracy = kfold_rfc(df_final10_r)
-    # rfc15_r_accuracy = kfold_rfc(df_final15_r)
-    # # Random Forest Regressor results
-    # rfr2_accuracy = kfold_rfr(df_final2)
-    # rfr5_accuracy = kfold_rfr(df_final5)
-    # rfr10_accuracy = kfold_rfr(df_final10)
-    # rfr15_accuracy = kfold_rfr(df_final15)
-    # rfr5_r_accuracy = kfold_rfr(df_final5_r)
-    # rfr10_r_accuracy = kfold_rfr(df_final10_r)
-    # rfr15_r_accuracy = kfold_rfr(df_final15_r)
+    # Logistic Regression results
+    logistic2_accuracy = kfold_logistic(df_final2)
+    logistic5_accuracy = kfold_logistic(df_final5)
+    logistic10_accuracy = kfold_logistic(df_final10)
+    logistic15_accuracy = kfold_logistic(df_final15)
+    logistic5_r_accuracy = kfold_logistic(df_final5_r)
+    logistic10_r_accuracy = kfold_logistic(df_final10_r)
+    logistic15_r_accuracy = kfold_logistic(df_final15_r)
 
-    # # XG Boost Classifier results
-    # xgbc2_accuracy = kfold_xgbc(df_final2)
-    # xgbc5_accuracy = kfold_xgbc(df_final5)
-    # xgbc10_accuracy = kfold_xgbc(df_final10)
-    # xgbc15_accuracy = kfold_xgbc(df_final15)
-    # xgbc5_r_accuracy = kfold_xgbc(df_final5_r)
-    # xgbc10_r_accuracy = kfold_xgbc(df_final10_r)
-    # xgbc15_r_accuracy = kfold_xgbc(df_final15_r)
-    # # XG Boost Regressor results
-    # xgbr2_accuracy = kfold_xgbr(df_final2)
-    # xgbr5_accuracy = kfold_xgbr(df_final5)
-    # xgbr10_accuracy = kfold_xgbr(df_final10)
-    # xgbr15_accuracy = kfold_xgbr(df_final15)
-    # xgbr5_r_accuracy = kfold_xgbr(df_final5_r)
-    # xgbr10_r_accuracy = kfold_xgbr(df_final10_r)
-    # xgbr15_r_accuracy = kfold_xgbr(df_final15_r)
+    # Linear Regression results
+    # Lasso
+    lasso2_accuracy = kfold_lasso(df_final2)
+    lasso5_accuracy = kfold_lasso(df_final5)
+    lasso10_accuracy = kfold_lasso(df_final10)
+    lasso15_accuracy = kfold_lasso(df_final15)
+    lasso5_r_accuracy = kfold_lasso(df_final5_r)
+    lasso10_r_accuracy = kfold_lasso(df_final10_r)
+    lasso15_r_accuracy = kfold_lasso(df_final15_r)
+    # Ridge
+    ridge2_accuracy = kfold_ridge(df_final2)
+    ridge5_accuracy = kfold_ridge(df_final5)
+    ridge10_accuracy = kfold_ridge(df_final10)
+    ridge15_accuracy = kfold_ridge(df_final15)
+    ridge5_r_accuracy = kfold_ridge(df_final5_r)
+    ridge10_r_accuracy = kfold_ridge(df_final10_r)
+    ridge15_r_accuracy = kfold_ridge(df_final15_r)
+    # Elastic Net
+    elastic2_accuracy = kfold_elastic(df_final2)
+    elastic5_accuracy = kfold_elastic(df_final5)
+    elastic10_accuracy = kfold_elastic(df_final10)
+    elastic15_accuracy = kfold_elastic(df_final15)
+    elastic5_r_accuracy = kfold_elastic(df_final5_r)
+    elastic10_r_accuracy = kfold_elastic(df_final10_r)
+    elastic15_r_accuracy = kfold_elastic(df_final15_r)
+    # Linear Regression
+    linear2_accuracy = kfold_linear(df_final2)
+    linear5_accuracy = kfold_linear(df_final5)
+    linear10_accuracy = kfold_linear(df_final10)
+    linear15_accuracy = kfold_linear(df_final15)
+    linear5_r_accuracy = kfold_linear(df_final5_r)
+    linear10_r_accuracy = kfold_linear(df_final10_r)
+    linear15_r_accuracy = kfold_linear(df_final15_r)
+    # SGD Regressor
+    sgd2_accuracy = kfold_sgd(df_final2)
+    sgd5_accuracy = kfold_sgd(df_final5)
+    sgd10_accuracy = kfold_sgd(df_final10)
+    sgd15_accuracy = kfold_sgd(df_final15)
+    sgd5_r_accuracy = kfold_sgd(df_final5_r)
+    sgd10_r_accuracy = kfold_sgd(df_final10_r)
+    sgd15_r_accuracy = kfold_sgd(df_final15_r)
+
+    # Random Forest Classifier results
+    rfc2_accuracy = kfold_rfc(df_final2)
+    rfc5_accuracy = kfold_rfc(df_final5)
+    rfc10_accuracy = kfold_rfc(df_final10)
+    rfc15_accuracy = kfold_rfc(df_final15)
+    rfc5_r_accuracy = kfold_rfc(df_final5_r)
+    rfc10_r_accuracy = kfold_rfc(df_final10_r)
+    rfc15_r_accuracy = kfold_rfc(df_final15_r)
+    # Random Forest Regressor results
+    rfr2_accuracy = kfold_rfr(df_final2)
+    rfr5_accuracy = kfold_rfr(df_final5)
+    rfr10_accuracy = kfold_rfr(df_final10)
+    rfr15_accuracy = kfold_rfr(df_final15)
+    rfr5_r_accuracy = kfold_rfr(df_final5_r)
+    rfr10_r_accuracy = kfold_rfr(df_final10_r)
+    rfr15_r_accuracy = kfold_rfr(df_final15_r)
+
+    # XG Boost Classifier results
+    xgbc2_accuracy = kfold_xgbc(df_final2)
+    xgbc5_accuracy = kfold_xgbc(df_final5)
+    xgbc10_accuracy = kfold_xgbc(df_final10)
+    xgbc15_accuracy = kfold_xgbc(df_final15)
+    xgbc5_r_accuracy = kfold_xgbc(df_final5_r)
+    xgbc10_r_accuracy = kfold_xgbc(df_final10_r)
+    xgbc15_r_accuracy = kfold_xgbc(df_final15_r)
+    # XG Boost Regressor results
+    xgbr2_accuracy = kfold_xgbr(df_final2)
+    xgbr5_accuracy = kfold_xgbr(df_final5)
+    xgbr10_accuracy = kfold_xgbr(df_final10)
+    xgbr15_accuracy = kfold_xgbr(df_final15)
+    xgbr5_r_accuracy = kfold_xgbr(df_final5_r)
+    xgbr10_r_accuracy = kfold_xgbr(df_final10_r)
+    xgbr15_r_accuracy = kfold_xgbr(df_final15_r)
 
     # MLP Classifier results
     mlp2_accuracy = kfold_mlp(df_final2)
@@ -686,48 +686,42 @@ if __name__ == '__main__':
     mlpr10_r_accuracy = kfold_mlpr(df_final10_r)
     mlpr15_r_accuracy = kfold_mlpr(df_final15_r)
 
-    # # Gradient Boosting Classifier results
-    # gbc2_accuracy = kfold_gbc(df_final2)
-    # gbc5_accuracy = kfold_gbc(df_final5)
-    # gbc10_accuracy = kfold_gbc(df_final10)
-    # gbc15_accuracy = kfold_gbc(df_final15)
-    # gbc5_r_accuracy = kfold_gbc(df_final5_r)
-    # gbc10_r_accuracy = kfold_gbc(df_final10_r)
-    # gbc15_r_accuracy = kfold_gbc(df_final15_r)
-    # # Gradient Boosting Regressor results
-    # gbr2_accuracy = kfold_gbr(df_final2)
-    # gbr5_accuracy = kfold_gbr(df_final5)
-    # gbr10_accuracy = kfold_gbr(df_final10)
-    # gbr15_accuracy = kfold_gbr(df_final15)
-    # gbr5_r_accuracy = kfold_gbr(df_final5_r)
-    # gbr10_r_accuracy = kfold_gbr(df_final10_r)
-    # gbr15_r_accuracy = kfold_gbr(df_final15_r)
-    #
-    # # SVM Classifier results
-    # svm2_accuracy = kfold_svm(df_final2)
-    # svm5_accuracy = kfold_svm(df_final5)
-    # svm10_accuracy = kfold_svm(df_final10)
-    # svm15_accuracy = kfold_svm(df_final15)
-    # svm5_r_accuracy = kfold_svm(df_final5_r)
-    # svm10_r_accuracy = kfold_svm(df_final10_r)
-    # svm15_r_accuracy = kfold_svm(df_final15_r)
-    # # SVM Regressor results
-    # svmr2_accuracy = kfold_svmr(df_final2)
-    # svmr5_accuracy = kfold_svmr(df_final5)
-    # svmr10_accuracy = kfold_svmr(df_final10)
-    # svmr15_accuracy = kfold_svmr(df_final15)
-    # svmr5_r_accuracy = kfold_svmr(df_final5_r)
-    # svmr10_r_accuracy = kfold_svmr(df_final10_r)
-    # svmr15_r_accuracy = kfold_svmr(df_final15_r)
-    #
-    # # Naive Bayes results
-    # nb2_accuracy = kfold_nb(df_final2)
-    # nb5_accuracy = kfold_nb(df_final5)
-    # nb10_accuracy = kfold_nb(df_final10)
-    # nb15_accuracy = kfold_nb(df_final15)
+    # Gradient Boosting Classifier results
+    gbc2_accuracy = kfold_gbc(df_final2)
+    gbc5_accuracy = kfold_gbc(df_final5)
+    gbc10_accuracy = kfold_gbc(df_final10)
+    gbc15_accuracy = kfold_gbc(df_final15)
+    gbc5_r_accuracy = kfold_gbc(df_final5_r)
+    gbc10_r_accuracy = kfold_gbc(df_final10_r)
+    gbc15_r_accuracy = kfold_gbc(df_final15_r)
+    # Gradient Boosting Regressor results
+    gbr2_accuracy = kfold_gbr(df_final2)
+    gbr5_accuracy = kfold_gbr(df_final5)
+    gbr10_accuracy = kfold_gbr(df_final10)
+    gbr15_accuracy = kfold_gbr(df_final15)
+    gbr5_r_accuracy = kfold_gbr(df_final5_r)
+    gbr10_r_accuracy = kfold_gbr(df_final10_r)
+    gbr15_r_accuracy = kfold_gbr(df_final15_r)
 
+    # SVM Classifier results
+    svm2_accuracy = kfold_svm(df_final2)
+    svm5_accuracy = kfold_svm(df_final5)
+    svm10_accuracy = kfold_svm(df_final10)
+    svm15_accuracy = kfold_svm(df_final15)
+    svm5_r_accuracy = kfold_svm(df_final5_r)
+    svm10_r_accuracy = kfold_svm(df_final10_r)
+    svm15_r_accuracy = kfold_svm(df_final15_r)
+    # SVM Regressor results
+    svmr2_accuracy = kfold_svmr(df_final2)
+    svmr5_accuracy = kfold_svmr(df_final5)
+    svmr10_accuracy = kfold_svmr(df_final10)
+    svmr15_accuracy = kfold_svmr(df_final15)
+    svmr5_r_accuracy = kfold_svmr(df_final5_r)
+    svmr10_r_accuracy = kfold_svmr(df_final10_r)
+    svmr15_r_accuracy = kfold_svmr(df_final15_r)
 
-    print 'MLP 5'
-    print mlp5_accuracy
-    print 'MLPr 5'
-    print mlpr5_accuracy
+    # Naive Bayes results
+    nb2_accuracy = kfold_nb(df_final2)
+    nb5_accuracy = kfold_nb(df_final5)
+    nb10_accuracy = kfold_nb(df_final10)
+    nb15_accuracy = kfold_nb(df_final15)

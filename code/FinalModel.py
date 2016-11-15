@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPRegressor
 from sklearn.cross_validation import KFold
 
-def kfold_mlpr(df_final):
+def mlpr(df_final):
     '''
     pass in df_final dataframe
     function performs KFold cross validation, fits model
@@ -23,23 +23,15 @@ def kfold_mlpr(df_final):
     # we don't want any categorical variables in the model
     X = df.values
 
-    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
-    index = 0
-    accuracy = np.empty(5)
     model = MLPRegressor(solver = 'lbfgs', alpha = 2.0091e-5, hidden_layer_sizes = (5,2), \
     activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
-    for train, test in kf:
-        scaler = StandardScaler()
-        scaler.fit(X[train])
-        X[train] = scaler.transform(X[train])
-        X[test] = scaler.transform(X[test])
-        model.fit(X[train], y2[train])
-        pred = model.predict(X[test])
-        pred = map(lambda x: 1 if x > 0 else 0, pred)
-        accuracy[index] = accuracy_score(y1[test], pred)
-        index += 1
 
-    return model, np.mean(accuracy)
+    scaler = StandardScaler()
+    scaler.fit(X)
+    X = scaler.transform(X)
+    model.fit(X, y2)
+
+    return model
 
 def get_data():
     '''
@@ -131,7 +123,7 @@ if __name__ == '__main__':
     # only change team names and date
 
     # gets model and accuracy of model
-    mlpr, mlpr_accuracy = kfold_mlpr(df_final5_LS)
+    mlpr = mlpr(df_final5_LS)
 
     # pickles model
     pickle_model(mlpr, filename = 'mlpr_regressor_model.pk')

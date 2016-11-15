@@ -8,11 +8,19 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPRegressor, MLPClassifier
 from sklearn.cross_validation import KFold
 
-def kfold_mlpr(df_final):
+# This file will pickle chosen models, unpickle them, make predictions, and find
+# the cumulative average accuracy as time goes on.
+# From here, I will choose a final model that will then be transferred to the
+# FinalModel.py file where the test data will be passed in.
+# In this file, I will also make a graphic comparing the cumulative
+# accuracies over time for a select few models (3-5)
+
+# Best Model contenders
+
+def mlpr(df_final):
     '''
     pass in df_final dataframe
-    function performs KFold cross validation, fits model
-    returns mean accuracy
+    function fits model
     '''
     df = df_final.copy()
     y1 = df.pop('home_team_win')
@@ -23,25 +31,17 @@ def kfold_mlpr(df_final):
     # we don't want any categorical variables in the model
     X = df.values
 
-    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
-    index = 0
-    accuracy = np.empty(5)
     model = MLPRegressor(solver = 'lbfgs', alpha = 2.0091e-5, hidden_layer_sizes = (5,2), \
     activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
-    for train, test in kf:
-        scaler = StandardScaler()
-        scaler.fit(X[train])
-        X[train] = scaler.transform(X[train])
-        X[test] = scaler.transform(X[test])
-        model.fit(X[train], y2[train])
-        pred = model.predict(X[test])
-        pred = map(lambda x: 1 if x > 0 else 0, pred)
-        accuracy[index] = accuracy_score(y1[test], pred)
-        index += 1
 
-    return model, np.mean(accuracy)
+    scaler = StandardScaler()
+    scaler.fit(X)
+    X= scaler.transform(X)
+    model.fit(X, y2)
 
-def kfold_mlp(df_final):
+    return model
+
+def mlp(df_final):
     '''
     pass in df_final dataframe
     function performs KFold cross validation, fits model
@@ -56,31 +56,24 @@ def kfold_mlp(df_final):
     # we don't want any categorical variables in the model
     X = df.values
 
-    kf = KFold(len(X), n_folds = 5, random_state = 2, shuffle = True)
-    index = 0
-    accuracy = np.empty(5)
     model = MLPClassifier(solver = 'lbfgs', alpha = 0.001100009, hidden_layer_sizes = (5,2), \
     activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
-    for train, test in kf:
-        scaler = StandardScaler()
-        scaler.fit(X[train])
-        X[train] = scaler.transform(X[train])
-        X[test] = scaler.transform(X[test])
-        model.fit(X[train], y1[train])
-        pred = model.predict(X[test])
-        accuracy[index] = accuracy_score(y1[test], pred)
-        index +=1
 
-    return model, np.mean(accuracy)
+    scaler = StandardScaler()
+    scaler.fit(X)
+    X = scaler.transform(X)
+    model.fit(X, y1)
 
-def pickle_model(model, filename = 'mlp_regressor_model.pk'):
+    return model
+
+def pickle_model(model, filename):
     '''
     pass in model that you would like to pickle and filename you would like to use
     will return pickled model
     '''
     pk.dump(model, open(filename, 'w'), 2)
 
-def unpickle_and_predict(df_final, filename='mlpr_regressor_model.pk'):
+def unpickle_and_predict(df_final, filename):
     '''
     pass in the dataframe that you want to predict on
     function unpickles the model
@@ -104,7 +97,7 @@ def unpickle_and_predict(df_final, filename='mlpr_regressor_model.pk'):
     predictions = map(lambda x: 1 if x > 0 else 0, predictions)
     return predictions
 
-def cumulative_accuracy(df_final_LS, filename='mlpr_regressor_model.pk'):
+def cumulative_accuracy(df_final_LS, filename):
     '''
     takes in last season dataframe and pickled model you want to visualize
     return a dataframe with cumulative average over time
@@ -128,8 +121,8 @@ if __name__ == '__main__':
     df_final5_LS.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
     # gets models and accuracy of models
-    mlpr, mlpr_accuracy = kfold_mlpr(df_final5_LS)
-    mlp, mlp_accuracy= kfold_mlp(df_final5_LS)
+    mlpr = mlpr(df_final5_LS)
+    mlp = mlp(df_final5_LS)
 
     # pickles models
     pickle_model(mlpr, filename = 'mlpr_regressor_model.pk')
