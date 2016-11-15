@@ -9,12 +9,6 @@ from sklearn.neural_network import MLPRegressor, MLPClassifier
 from sklearn.linear_model import ElasticNet, Lasso, Ridge
 from sklearn.ensemble import RandomForestRegressor
 
-# This file will pickle chosen models, unpickle them, make predictions, and find
-# the cumulative average accuracy as time goes on.
-# From here, I will choose a final model that will then be transferred to the
-# FinalModel.py file where the test data will be passed in.
-# In this file, I will also make a graphic comparing the cumulative
-# accuracies over time for a select few models (3-5)
 
 def proportion_data(df_final):
     '''
@@ -47,59 +41,6 @@ def proportion_data(df_final):
 
     return df
 
-# Best Model contenders
-
-def mlpr(df_final):
-    '''
-    pass in df_final dataframe
-    function fits model
-    '''
-    df = df_final.copy()
-    y1 = df.pop('home_team_win')
-    # variable 1 to predict
-    y2 = df.pop('spread')
-    # variable 2 to predict
-    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
-    # we don't want any categorical variables in the model
-    X = df.values
-
-    model = MLPRegressor(solver = 'lbfgs', alpha = 2.0091e-5, hidden_layer_sizes = (5,2), \
-    activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
-
-    scaler = StandardScaler()
-    scaler.fit(X)
-    X= scaler.transform(X)
-    model.fit(X, y2)
-    predictions = model.predict(X)
-    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
-
-    return model, predictions
-
-def mlp(df_final):
-    '''
-    pass in df_final dataframe
-    function fits model
-    '''
-    df = df_final.copy()
-    y1 = df.pop('home_team_win')
-    # variable 1 to predict
-    y2 = df.pop('spread')
-    # variable 2 to predict
-    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
-    # we don't want any categorical variables in the model
-    X = df.values
-
-    model = MLPClassifier(solver = 'lbfgs', alpha = 0.001100009, hidden_layer_sizes = (5,2), \
-    activation = 'relu', learning_rate = 'adaptive', tol = 1e-4, random_state = 2)
-
-    scaler = StandardScaler()
-    scaler.fit(X)
-    X = scaler.transform(X)
-    model.fit(X, y1)
-    predictions = model.predict(X)
-
-    return model, predictions
-
 def xgbc(df_final):
     '''
     pass in df_final dataframe
@@ -117,75 +58,8 @@ def xgbc(df_final):
     model = xgb.XGBClassifier()
 
     model.fit(X, y1)
-    predictions = model.predict(X)
 
-    return model, predictions
-
-def elastic(df_final):
-    '''
-    pass in df_final dataframe
-    function fits model
-    '''
-    df = df_final.copy()
-    y1 = df.pop('home_team_win')
-    # variable 1 to predict
-    y2 = df.pop('spread')
-    # variable 2 to predict
-    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
-    # we don't want any categorical variables in the model
-    X = df.values
-
-    model = ElasticNet(alpha = 0.8, fit_intercept = False)
-
-    model.fit(X, y2)
-    predictions = model.predict(X)
-    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
-
-    return model, predictions
-
-def lasso(df_final):
-    '''
-    pass in df_final dataframe
-    function fits model
-    '''
-    df = df_final.copy()
-    y1 = df.pop('home_team_win')
-    # variable 1 to predict
-    y2 = df.pop('spread')
-    # variable 2 to predict
-    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
-    # we don't want any categorical variables in the model
-    X = df.values
-
-    model = Lasso(alpha = 0.0119, random_state = 2, fit_intercept = False)
-
-    model.fit(X, y2)
-    predictions = model.predict(X)
-    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
-
-    return model, predictions
-
-def ridge(df_final):
-    '''
-    pass in df_final dataframe
-    function fits model
-    '''
-    df = df_final.copy()
-    y1 = df.pop('home_team_win')
-    # variable 1 to predict
-    y2 = df.pop('spread')
-    # variable 2 to predict
-    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
-    # we don't want any categorical variables in the model
-    X = df.values
-
-    model = Ridge(alpha = 15, fit_intercept = False, random_state = 2)
-
-    model.fit(X, y2)
-    predictions = model.predict(X)
-    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
-
-    return model, predictions
+    return model
 
 def rfr(df_final):
     '''
@@ -204,16 +78,43 @@ def rfr(df_final):
     model = RandomForestRegressor(random_state = 2)
 
     model.fit(X, y2)
+
+    return model
+
+def pickle_model(model, filename):
+    '''
+    pass in model that you would like to pickle and filename you would like to use
+    will return pickled model
+    '''
+    pk.dump(model, open(filename, 'w'), 2)
+
+def unpickle_and_predict(df_final, filename):
+    '''
+    pass in the dataframe that you want to predict on
+    function unpickles the model
+    returns predictions
+    '''
+    model = pk.load(open(filename))
+
+    df = df_final.copy()
+    y1 = df.pop('home_team_win')
+    # variable 1 to predict
+    y2 = df.pop('spread')
+    # variable 2 to predict
+    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
+    # we don't want any categorical variables in the model
+    X = df.values
+
     predictions = model.predict(X)
     predictions = map(lambda x: 1 if x > 0 else 0, predictions)
+    return predictions
 
-    return model, predictions
-
-def cumulative_accuracy(df_final, predictions):
+def cumulative_accuracy(df_final, filename):
     '''
     takes in last season dataframe and pickled model you want to visualize
     return a dataframe with cumulative average over time
     '''
+    predictions = unpickle_and_predict(df_final, filename)
     df_final = df_final[['home_team', 'away_team', 'date', 'home_team_win']]
     preds = pd.DataFrame(predictions)
     preds.columns = [['prediction']]
@@ -247,62 +148,82 @@ if __name__ == '__main__':
 
     df_final5_r = proportion_data(df_final5)
 
-    # gets models, predictions: LAST SEASON
-    mlprLS, mlprLS_preds = mlpr(df_final5_LS)
-    mlpLS, mlpLS_preds = mlp(df_final5_LS)
-    xgbcLS, xgbcLS_preds = xgbc(df_final5_LSr)
-    enLS, enLS_preds = elastic(df_final5_LS)
-    lasso5LS, lasso5LS_preds = lasso(df_final5_LS)
-    lasso10LS, lasso10LS_preds = lasso(df_final10_LS)
-    ridgeLS, ridgeLS_preds = ridge(df_final10_LS)
-    rfrLS, rfrLS_preds = rfr(df_final15_LS)
+    # gets models: LAST SEASON
+    mlprLS = mlpr(df_final5_LS)
+    mlpLS = mlp(df_final5_LS)
+    xgbcLS = xgbc(df_final5_LSr)
+    enLS = elastic(df_final5_LS)
+    lasso5LS = lasso(df_final5_LS)
+    lasso10LS = lasso(df_final10_LS)
+    ridgeLS = ridge(df_final10_LS)
+    rfrLS = rfr(df_final15_LS)
 
-    # gets models, predictions: THIS SEASON
-    mlpr, mlpr_preds = mlpr(df_final5)
-    mlp, mlp_preds = mlp(df_final5)
-    xgbc, xgbc_preds = xgbc(df_final5_r)
-    en, en_preds = elastic(df_final5)
-    lasso5, lasso5_preds = lasso(df_final5)
-    lasso10, lasso10_preds = lasso(df_final10)
-    ridge, ridge_preds = ridge(df_final10)
-    rfr, rfr_preds = rfr(df_final15)
+    # gets models: THIS SEASON
+    mlpr = mlpr(df_final5)
+    mlp = mlp(df_final5)
+    xgbc = xgbc(df_final5_r)
+    en = elastic(df_final5)
+    lasso5 = lasso(df_final5)
+    lasso10 = lasso(df_final10)
+    ridge = ridge(df_final10)
+    rfr = rfr(df_final15)
+
+    # pickles models: LAST SEASON
+    pickle_model(mlprLS, filename = 'mlpr_regressor_modelLS.pk')
+    pickle_model(mlpLS, filename = 'mlp_classifier_modelLS.pk')
+    pickle_model(xgbcLS, filename = 'xgb_classifier_modelLS.pk')
+    pickle_model(enLS, filename = 'elastic_net_modelLS.pk')
+    pickle_model(lasso5LS, filename = 'lasso5_modelLS.pk')
+    pickle_model(lasso10LS, filename = 'lasso10_modelLS.pk')
+    pickle_model(ridgeLS, filename = 'ridge_regression_modelLS.pk')
+    pickle_model(rfrLS, filename = 'random_forest_regressorLS.pk')
+
+    # pickles models: THIS SEASON
+    pickle_model(mlpr, filename = 'mlpr_regressor_model.pk')
+    pickle_model(mlp, filename = 'mlp_classifier_model.pk')
+    pickle_model(xgbc, filename = 'xgb_classifier_model.pk')
+    pickle_model(en, filename = 'elastic_net_model.pk')
+    pickle_model(lasso5, filename = 'lasso5_model.pk')
+    pickle_model(lasso10, filename = 'lasso10_model.pk')
+    pickle_model(ridge, filename = 'ridge_regression_model.pk')
+    pickle_model(rfr, filename = 'random_forest_regressor.pk')
 
     # LAST SEASON DATA
     # THESE MODELS ARE FOR VISUALIZATIONS ONLY
     # unpickle model, get predictions, and return df with cumulative average accuracy
-    df_mlprLS = cumulative_accuracy(df_final5_LS, mlprLS_preds)
+    df_mlprLS = cumulative_accuracy_scaler(df_final5_LS, filename = 'mlpr_regressor_modelLS.pk')
         # accuracy: 62.3%
-    df_mlpLS = cumulative_accuracy(df_final5_LS, mlpLS_preds)
+    df_mlpLS = cumulative_accuracy_scaler(df_final5_LS, filename = 'mlp_classifier_modelLS.pk')
         # accuracy: 65.8%
-    df_xgbcLS = cumulative_accuracy(df_final5_LSr, xgbcLS_preds)
+    df_xgbcLS = cumulative_accuracy(df_final5_LSr, filename = 'xgb_classifier_modelLS.pk')
         # accuracy: 80.9%
-    df_enLS = cumulative_accuracy(df_final5_LS, enLS_preds)
+    df_enLS = cumulative_accuracy(df_final5_LS, filename = 'elastic_net_modelLS.pk')
         # accuracy: 53.4%
-    df_lasso5LS = cumulative_accuracy(df_final5_LS, lasso5LS_preds)
+    df_lasso5LS = cumulative_accuracy(df_final5_LS, filename = 'lasso5_modelLS.pk')
         # accuracy: 55.7%
-    df_lasso10LS = cumulative_accuracy(df_final10_LS, lasso10LS_preds)
+    df_lasso10LS = cumulative_accuracy(df_final10_LS, filename = 'lasso10_modelLS.pk')
         # accuracy: 57.3%
-    df_ridgeLS = cumulative_accuracy(df_final10_LS, ridgeLS_preds)
+    df_ridgeLS = cumulative_accuracy(df_final10_LS, filename = 'ridge_regression_modelLS.pk')
         # accuracy: 57.6%
-    df_rfrLS = cumulative_accuracy(df_final15_LS, rfrLS_preds)
+    df_rfrLS = cumulative_accuracy(df_final15_LS, filename = 'random_forest_regressorLS.pk')
         # accuracy: 91.5%
 
     # THIS SEASON DATA
     # THESE MODELS ARE FOR VISUALIZATIONS ONLY
     # unpickle model, get predictions, and return df with cumulative average accuracy
-    df_mlpr = cumulative_accuracy(df_final5, mlpr_preds)
+    df_mlpr = cumulative_accuracy_scaler(df_final5, filename = 'mlpr_regressor_model.pk')
         # accuracy: 63.8%
-    df_mlp = cumulative_accuracy(df_final5, mlp_preds)
+    df_mlp = cumulative_accuracy_scaler(df_final5, filename = 'mlp_classifier_model.pk')
         # accuracy: 70.8%
-    df_xgbc = cumulative_accuracy(df_final5_r, xgbc_preds)
+    df_xgbc = cumulative_accuracy(df_final5_r, filename = 'xgb_classifier_model.pk')
         # accuracy: 99.0%
-    df_en = cumulative_accuracy(df_final5, en_preds)
-        # accuracy: 60.8%
-    df_lasso5 = cumulative_accuracy(df_final5, lasso5_preds)
+    df_en = cumulative_accuracy(df_final5, filename = 'elastic_net_model.pk')
+        # accuracy: 60.1%
+    df_lasso5 = cumulative_accuracy(df_final5, filename = 'lasso5_model.pk')
         # accuracy: 64.8%
-    df_lasso10 = cumulative_accuracy(df_final10, lasso10_preds)
+    df_lasso10 = cumulative_accuracy(df_final10, filename = 'lasso10_model.pk')
         # accuracy: 61.3%
-    df_ridge = cumulative_accuracy(df_final10, ridge_preds)
+    df_ridge = cumulative_accuracy(df_final10, filename = 'ridge_regression_model.pk')
         # accuracy: 62.3%
-    df_rfr = cumulative_accuracy(df_final15, rfr_preds)
+    df_rfr = cumulative_accuracy(df_final15, filename = 'random_forest_regressor.pk')
         # accuracy: 88.4%
