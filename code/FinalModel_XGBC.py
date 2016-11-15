@@ -4,41 +4,7 @@ import DataCleaning as dc
 import pandas as pd
 import numpy as np
 import cPickle as pk
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import StandardScaler
-from sklearn.neural_network import MLPRegressor
-from sklearn.cross_validation import KFold
-
-def proportion_data(df_final):
-    '''
-    pass in ifnal dataframe from DataCleaning that you want to transform
-    will return a new dataframe with proportional data (home team stat / away team stat)
-    currently, this function will only return dataset for W/L as variable trying to predict
-    '''
-    df= df_final.copy()
-    df['spread'] = (df['home_spread'] + 1e-4)/(df['away_spread'] + df['home_spread'] + 1e-4)
-    df['wins'] = (df['home_wins'] + 1e-4)/(df['away_wins'] + df['home_wins'] + 1e-4)
-    df['goals'] = (df['home_goals'] + 1e-4)/(df['away_goals'] + df['home_goals'] + 1e-4)
-    df['shots'] = (df['home_shots'] + 1e-4)/(df['away_shots'] + df['home_shots'] + 1e-4)
-    df['PP%'] = (df['home_PP%'] + 1e-4)/(df['away_PP%'] + df['home_PP%'] + 1e-4)
-    df['FOW%'] = (df['home_FOW%'] + 1e-4)/(df['away_FOW%'] + df['home_FOW%'] + 1e-4)
-    df['PIM'] = (df['home_PIM'] + 1e-4)/(df['away_PIM'] + df['home_PIM'] + 1e-4)
-    df['hits'] = (df['home_hits'] + 1e-4)/(df['away_hits'] + df['home_hits'] + 1e-4)
-    df['blocked'] = (df['home_blocked'] + 1e-4)/(df['away_blocked'] + df['home_blocked'] + 1e-4)
-    df['takeaways'] = (df['home_takeaways'] + 1e-4)/(df['away_takeaways'] + df['home_takeaways'] + 1e-4)
-    df['save%'] = (df['home_save%'] + 1e-4)/(df['away_save%'] + df['home_save%'] + 1e-4)
-    df['shot%'] = (df['home_shot%'] + 1e-4)/(df['away_shot%'] + df['home_shot%'] + 1e-4)
-    df['PDO'] = (df['home_PDO'] + 1e-4)/(df['away_PDO'] + df['home_PDO'] + 1e-4)
-    df['corsi'] = (df['home_corsi'] + 1e-4)/(df['away_corsi'] + df['home_corsi'] + 1e-4)
-    df.drop(['home_spread', 'home_wins', 'home_goals', 'home_shots', 'home_PP%', \
-    'home_FOW%', 'home_PIM', 'home_hits', 'home_blocked', \
-    'home_takeaways', 'home_save%', 'home_shot%', 'home_PDO', 'home_corsi', \
-    'away_spread', 'away_wins', 'away_goals', 'away_shots', 'away_PP%', \
-    'away_FOW%', 'away_PIM', 'away_hits', 'away_blocked', \
-    'away_takeaways', 'away_save%', 'away_shot%', 'away_PDO', 'away_corsi'], \
-    axis = 1, inplace = True)
-
-    return df
+import xgboost as xgb
 
 def xgbc(df_final):
     '''
@@ -127,7 +93,6 @@ def unpickle_and_predict(df_final, filename):
     X = df.values
 
     predictions = model.predict(X)
-    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
     return predictions
 
 if __name__ == '__main__':
@@ -136,12 +101,11 @@ if __name__ == '__main__':
     df_final5_LS = pd.read_csv('data/final5LS.csv')
     df_final5_LS.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
-    df_final5_LSr = proportion_data(df_final5_LS)
+    df_final5_LSr = mv.proportion_data(df_final5_LS)
 
     # gets data that we want to predict on, if don't want to add new rows (past games)
     df_final5 = pd.read_csv('data/final5.csv')
     df_final5.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
-
 
     # if you want to know new games, this appends rows to past games to make 1 big df
     df_all, df_games = get_data()
@@ -149,27 +113,38 @@ if __name__ == '__main__':
     # every time you want to add a new row, copy this exact line and
     # only change team names and date
 
-    df_final5_new_r = proportion_data(df_final5_new)
+    df_final5_new_r = mv.proportion_data(df_final5_new)
 
     # gets model
-    xgbc = mv.xgbc(df_final5_LSr)
+    xgbc = xgbc(df_final5_LSr)
 
     # pickles model
     pickle_model(xgbc, filename = 'xgb_classifier_model.pk')
 
     # unpickle model and get predictions
     predictions = unpickle_and_predict(df_final5_new_r, filename = 'xgb_classifier_model.pk')
+    predictionsLS = unpickle_and_predict(df_final5_LSr, filename = 'xgb_classifier_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
-    df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]
+    df_final = df_final5_new_r[['home_team', 'away_team', 'date', 'home_team_win']]
     preds = pd.DataFrame(predictions)
     preds.columns = [['prediction']]
     final = pd.merge(df_final, preds, how = 'left', left_index = True, right_index = True)
-    final.sort_values('date', ascending = False, inplace = True)
+    final.sort_values('date', ascending = True, inplace = True)
     final = final.reset_index(drop=True)
-    # most recent games will be at the top
+    final['match'] = np.where(final['home_team_win'] == final['prediction'], 1, 0)
+    final['cumulative_average'] = pd.expanding_mean(final['match'], 1)
+    # most recent games will be at the bottom
+    # 56.0% accuracy
 
-    # if you want to know the accuracy of the current season predictions:
-    # keep in mind, all of the "actual" values for future games is -100
-    # so those will bring down the accuracy
-    new_accuracy = accuracy_score(final['home_team_win'], final['prediction'])
+    # last season
+    df_finalLS = df_final5_LSr[['home_team', 'away_team', 'date', 'home_team_win']]
+    predsLS = pd.DataFrame(predictionsLS)
+    predsLS.columns = [['prediction']]
+    finalLS = pd.merge(df_finalLS, predsLS, how = 'left', left_index = True, right_index = True)
+    finalLS.sort_values('date', ascending = True, inplace = True)
+    finalLS = finalLS.reset_index(drop=True)
+    finalLS['match'] = np.where(finalLS['home_team_win'] == finalLS['prediction'], 1, 0)
+    finalLS['cumulative_average'] = pd.expanding_mean(finalLS['match'], 1)
+    # these results match what was found in ModelVisualization.py
+    # 80.1% accuracy

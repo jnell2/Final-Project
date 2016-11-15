@@ -187,28 +187,6 @@ def ridge(df_final):
 
     return model, predictions
 
-def rfr(df_final):
-    '''
-    pass in df_final dataframe
-    function fits model
-    '''
-    df = df_final.copy()
-    y1 = df.pop('home_team_win')
-    # variable 1 to predict
-    y2 = df.pop('spread')
-    # variable 2 to predict
-    df.drop(['home_team', 'away_team', 'date'], axis = 1, inplace = True)
-    # we don't want any categorical variables in the model
-    X = df.values
-
-    model = RandomForestRegressor(random_state = 2)
-
-    model.fit(X, y2)
-    predictions = model.predict(X)
-    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
-
-    return model, predictions
-
 def cumulative_accuracy(df_final, predictions):
     '''
     takes in last season dataframe and pickled model you want to visualize
@@ -232,8 +210,6 @@ if __name__ == '__main__':
     df_final5_LS.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
     df_final10_LS = pd.read_csv('data/final10LS.csv')
     df_final10_LS.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
-    df_final15_LS = pd.read_csv('data/final15LS.csv')
-    df_final15_LS.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
     df_final5_LSr = proportion_data(df_final5_LS)
 
@@ -242,8 +218,6 @@ if __name__ == '__main__':
     df_final5.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
     df_final10 = pd.read_csv('data/final10.csv')
     df_final10.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
-    df_final15 = pd.read_csv('data/final15.csv')
-    df_final15.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
     df_final5_r = proportion_data(df_final5)
 
@@ -255,7 +229,6 @@ if __name__ == '__main__':
     lasso5LS, lasso5LS_preds = lasso(df_final5_LS)
     lasso10LS, lasso10LS_preds = lasso(df_final10_LS)
     ridgeLS, ridgeLS_preds = ridge(df_final10_LS)
-    rfrLS, rfrLS_preds = rfr(df_final15_LS)
 
     # gets models, predictions: THIS SEASON
     mlpr, mlpr_preds = mlpr(df_final5)
@@ -265,7 +238,6 @@ if __name__ == '__main__':
     lasso5, lasso5_preds = lasso(df_final5)
     lasso10, lasso10_preds = lasso(df_final10)
     ridge, ridge_preds = ridge(df_final10)
-    rfr, rfr_preds = rfr(df_final15)
 
     # LAST SEASON DATA
     # THESE MODELS ARE FOR VISUALIZATIONS ONLY
@@ -284,8 +256,6 @@ if __name__ == '__main__':
         # accuracy: 57.3%
     df_ridgeLS = cumulative_accuracy(df_final10_LS, ridgeLS_preds)
         # accuracy: 57.6%
-    df_rfrLS = cumulative_accuracy(df_final15_LS, rfrLS_preds)
-        # accuracy: 91.5%
 
     # THIS SEASON DATA
     # THESE MODELS ARE FOR VISUALIZATIONS ONLY
@@ -304,5 +274,3 @@ if __name__ == '__main__':
         # accuracy: 61.3%
     df_ridge = cumulative_accuracy(df_final10, ridge_preds)
         # accuracy: 62.3%
-    df_rfr = cumulative_accuracy(df_final15, rfr_preds)
-        # accuracy: 88.4%
