@@ -4,9 +4,9 @@ import DataCleaning as dc
 import pandas as pd
 import numpy as np
 import cPickle as pk
-from sklearn.linear_model import ElasticNet, Lasso, Ridge
+from sklearn.ensemble import GradientBoostingClassifier
 
-def ridge(df_final):
+def gbc(df_final):
     '''
     pass in df_final dataframe
     function fits model
@@ -20,13 +20,12 @@ def ridge(df_final):
     # we don't want any categorical variables in the model
     X = df.values
 
-    model = Ridge(alpha = 15, fit_intercept = False, random_state = 2)
+    model = GradientBoostingClassifier(random_state = 2)
 
-    model.fit(X, y2)
+    model.fit(X, y1)
     predictions = model.predict(X)
-    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
 
-    return model, predictions, model.coefs_
+    return model, predictions
 
 def get_data():
     '''
@@ -65,7 +64,7 @@ def add_rows(df_all, df_games, home_team, away_team, date):
 
     df_games = df_games.append(df, ignore_index = True)
 
-    df_final5 = dc.cumulative_stats(df_all, df_games, 10)
+    df_final5 = dc.cumulative_stats(df_all, df_games, 5)
     df_final5.drop(['home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
     return df_games, df_final5
@@ -101,38 +100,29 @@ def unpickle_and_predict(df_final, filename):
 if __name__ == '__main__':
 
     # read in data to train model
-    df_final10_LS = pd.read_csv('data/final10LS.csv')
-    df_final10_LS.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
+    df_final5_LS = pd.read_csv('data/final5LS.csv')
+    df_final5_LS.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
     # gets data that we want to predict on, if don't want to add new rows (past games)
-    df_final10 = pd.read_csv('data/final10.csv')
-    df_final10.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
+    df_final5 = pd.read_csv('data/final5.csv')
+    df_final5.drop(['Unnamed: 0', 'home_giveaways', 'away_giveaways'], axis = 1, inplace = True)
 
     # if you want to know new games, this appends rows to past games to make 1 big df
     df_all, df_games = get_data()
-    df_games, df_final10_new = add_rows(df_all, df_games, 'BUF', 'TBL', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'PHI', 'WPG', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'TOR', 'FLA', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'OTT', 'NSH', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'STL', 'SJS', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'MIN', 'BOS', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'DAL', 'COL', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'VAN', 'ARI', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'ANA', 'NJD', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'LAK', 'EDM', '2016-11-17')
+    df_games, df_final5_new = add_rows(df_all, df_games, 'BUF', 'TBL', '2016-11-17')
     # every time you want to add a new row, copy this exact line and
     # only change team names and date
 
     # gets model
-    ridge, predictionsLS, coefs = ridge(df_final10_LS)
+    gbc, predictionsLS = gbc(df_final5_LS)
 
     # pickles model
-    pickle_model(ridge, filename = 'ridge_model.pk')
+    pickle_model(gbc, filename = 'gbc_model.pk')
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final10_new, filename = 'ridge_model.pk')
+    predictions = unpickle_and_predict(df_final5_new, filename = 'gbc_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
-    df_final = df_final10_new[['home_team', 'away_team', 'date', 'home_team_win']]
+    df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]
     preds = pd.DataFrame(predictions)
     preds.columns = [['prediction']]
     final = pd.merge(df_final, preds, how = 'left', left_index = True, right_index = True)
@@ -141,10 +131,10 @@ if __name__ == '__main__':
     final['match'] = np.where(final['home_team_win'] == final['prediction'], 1, 0)
     final['cumulative_average'] = pd.expanding_mean(final['match'], 1)
     # most recent games will be at the bottom
-    # 58.8% accuracy
+    # 58.0% accuracy
 
     # last season
-    df_finalLS = df_final10_LS[['home_team', 'away_team', 'date', 'home_team_win']]
+    df_finalLS = df_final5_LS[['home_team', 'away_team', 'date', 'home_team_win']]
     predsLS = pd.DataFrame(predictionsLS)
     predsLS.columns = [['prediction']]
     finalLS = pd.merge(df_finalLS, predsLS, how = 'left', left_index = True, right_index = True)
@@ -153,7 +143,7 @@ if __name__ == '__main__':
     finalLS['match'] = np.where(finalLS['home_team_win'] == finalLS['prediction'], 1, 0)
     finalLS['cumulative_average'] = pd.expanding_mean(finalLS['match'], 1)
     # these results don't match what was found in ModelVisualization.py
-    # 57.6% accuracy
+    # 84.5% accuracy
 
-    final.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final_Ridge.csv')
-    finalLS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/finalLS_Ridge.csv')
+    final.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final_gbc.csv')
+    finalLS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/finalLS_gbc.csv')

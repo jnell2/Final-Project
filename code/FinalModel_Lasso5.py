@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # pickles model
     pickle_model(lasso, filename = 'lasso5_model.pk')
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final5_new, filename = 'lasso5_model.pk')
+    predictions = unpickle_and_predict(df_final10_new, filename = 'lasso5_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
     df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]

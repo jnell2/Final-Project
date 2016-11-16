@@ -36,7 +36,7 @@ if __name__ == '__main__':
     sns.set_color_codes('dark')
     sns.set(font_scale = 1.5)
 
-    plt.figure(figsize = (15, 9))
+    plt.figure(figsize = (18, 9))
     plt.subplot(2,1,1)
     plt.plot(elasticLS['cumulative_average'], color = 'm', label = 'Elastic Net')
     plt.plot(lasso10LS['cumulative_average'], color = 'g', label = 'Lasso Regression')

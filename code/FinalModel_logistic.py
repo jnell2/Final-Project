@@ -4,9 +4,9 @@ import DataCleaning as dc
 import pandas as pd
 import numpy as np
 import cPickle as pk
-from sklearn.linear_model import ElasticNet, Lasso, Ridge
+from sklearn.linear_model import LogisticRegression
 
-def ridge(df_final):
+def logistic(df_final):
     '''
     pass in df_final dataframe
     function fits model
@@ -20,13 +20,12 @@ def ridge(df_final):
     # we don't want any categorical variables in the model
     X = df.values
 
-    model = Ridge(alpha = 15, fit_intercept = False, random_state = 2)
+    model = LogisticRegression(random_state = 2)
 
-    model.fit(X, y2)
+    model.fit(X, y1)
     predictions = model.predict(X)
-    predictions = map(lambda x: 1 if x > 0 else 0, predictions)
 
-    return model, predictions, model.coefs_
+    return model, predictions
 
 def get_data():
     '''
@@ -111,25 +110,16 @@ if __name__ == '__main__':
     # if you want to know new games, this appends rows to past games to make 1 big df
     df_all, df_games = get_data()
     df_games, df_final10_new = add_rows(df_all, df_games, 'BUF', 'TBL', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'PHI', 'WPG', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'TOR', 'FLA', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'OTT', 'NSH', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'STL', 'SJS', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'MIN', 'BOS', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'DAL', 'COL', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'VAN', 'ARI', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'ANA', 'NJD', '2016-11-17')
-    df_games, df_final10_new = add_rows(df_all, df_games, 'LAK', 'EDM', '2016-11-17')
     # every time you want to add a new row, copy this exact line and
     # only change team names and date
 
     # gets model
-    ridge, predictionsLS, coefs = ridge(df_final10_LS)
+    logistic, predictionsLS = logistic(df_final10_LS)
 
     # pickles model
-    pickle_model(ridge, filename = 'ridge_model.pk')
+    pickle_model(logistic, filename = 'logistic_model.pk')
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final10_new, filename = 'ridge_model.pk')
+    predictions = unpickle_and_predict(df_final10_new, filename = 'logistic_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
     df_final = df_final10_new[['home_team', 'away_team', 'date', 'home_team_win']]
@@ -141,7 +131,7 @@ if __name__ == '__main__':
     final['match'] = np.where(final['home_team_win'] == final['prediction'], 1, 0)
     final['cumulative_average'] = pd.expanding_mean(final['match'], 1)
     # most recent games will be at the bottom
-    # 58.8% accuracy
+    # 58.5% accuracy
 
     # last season
     df_finalLS = df_final10_LS[['home_team', 'away_team', 'date', 'home_team_win']]
@@ -153,7 +143,7 @@ if __name__ == '__main__':
     finalLS['match'] = np.where(finalLS['home_team_win'] == finalLS['prediction'], 1, 0)
     finalLS['cumulative_average'] = pd.expanding_mean(finalLS['match'], 1)
     # these results don't match what was found in ModelVisualization.py
-    # 57.6% accuracy
+    # 57.2% accuracy
 
-    final.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final_Ridge.csv')
-    finalLS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/finalLS_Ridge.csv')
+    final.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/final_logistic.csv')
+    finalLS.to_csv('~/Documents/DataScienceImmersive/Final-Project/data/finalLS_logistic.csv')
