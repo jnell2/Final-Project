@@ -54,4 +54,4 @@ if __name__ == '__main__':
     plt.xlabel('Time')
     plt.ylabel('Accuracy')
     plt.title('2016-2017 Data')
-    plt.savefig('CumulativeAccuracy.png')
+    plt.savefig('images/CumulativeAccuracy.png')
