@@ -56,7 +56,7 @@ def clean_dts(df):
     df['PK%'] = df['PK%'].astype(float)
     df['FOW%'] = df['FOW%'].astype(float)
     df['date'] = pd.to_datetime(df['date'])
-    df.drop(['#', 'game', 'GP', 'T', 'OTL', 'points', 'PPG', 'PP', 'timesSH', 'PPGA', 'FOW', 'FOL'], axis=1, inplace=True)
+    df.drop(['#', 'game', 'GP', 'T', 'OTL', 'SOW', 'SOL', 'points', 'PPG', 'PP', 'timesSH', 'PPGA', 'FOW', 'FOL'], axis=1, inplace=True)
     df = df.reset_index(drop=True)
     return df
 

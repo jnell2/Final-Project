@@ -34,9 +34,9 @@ def Date_TS(soup):
     '''
     full_table = soup.find("table", {"class": "stat-table"})
     cols = ['#', 'team', 'game', 'opponent', 'GP', 'W', 'L', 'T', 'OTL', 'points', \
-    'GF', 'GA', 'SF', 'SA', 'PPG', 'PP', 'PP%', 'timesSH', 'PPGA', 'PK%', \
+    'GF', 'GA', 'SOW', 'SOL', 'SF', 'SA', 'PPG', 'PP', 'PP%', 'timesSH', 'PPGA', 'PK%', \
     'FOW', 'FOL', 'FOW%']
-    mat = np.ndarray((0,23))
+    mat = np.ndarray((0,25))
     lst = soup.find_all('tr', attrs = {'class': 'standard-row'})
     for i in lst:
         row = [elem.text for elem in i.find_all('td')]
@@ -154,7 +154,8 @@ def Date_Shots_loop(url, num_pages):
 def get_data():
 
     date1 = '2016-10-12' # start date of current season
-    date2 = datetime.date.today().strftime('%Y-%m-%d') # in format YYYY-MM-DD, this is the current date
+    # date2 = datetime.date.today().strftime('%Y-%m-%d') # in format YYYY-MM-DD, this is the current date
+    date2 = '2016-11-17'
 
     Date_TeamSummary_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=teamsummary&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=wins,points'.format(date1, date2)
     Date_Penalties_url = 'http://www.nhl.com/stats/team?aggregate=0&gameType=2&report=penalties&reportType=game&startDate={}&endDate={}&filter=gamesPlayed,gte,&sort=penaltyMinutes'.format(date1, date2)
