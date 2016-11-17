@@ -117,9 +117,9 @@ if __name__ == '__main__':
     gbc, predictionsLS = gbc(df_final2_LS)
 
     # pickles model
-    pickle_model(gbc, filename = 'gbc_model.pk')
+    pickle_model(gbc, filename = 'pickled/gbc_model.pk')
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final2_new, filename = 'gbc_model.pk')
+    predictions = unpickle_and_predict(df_final2_new, filename = 'pickled/gbc_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
     df_final = df_final2_new[['home_team', 'away_team', 'date', 'home_team_win']]

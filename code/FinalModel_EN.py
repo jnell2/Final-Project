@@ -127,9 +127,9 @@ if __name__ == '__main__':
     elastic, predictionsLS = elastic(df_final5_LS)
 
     # pickles model
-    pickle_model(elastic, filename = 'elastic_model.pk')
+    pickle_model(elastic, filename = 'pickled/elastic_model.pk')
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final5_new, filename = 'elastic_model.pk')
+    predictions = unpickle_and_predict(df_final5_new, filename = 'pickled/elastic_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
     df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]

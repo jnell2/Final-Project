@@ -130,10 +130,10 @@ if __name__ == '__main__':
     mlp, predictionsLS = mlp(df_final5_LS)
 
     # pickles model
-    pickle_model(mlp, filename = 'mlp_classifier_model.pk')
+    pickle_model(mlp, filename = 'pickled/mlp_classifier_model.pk')
 
     # unpickle model and get predictions
-    predictions = unpickle_and_predict(df_final5_new, filename = 'mlp_classifier_model.pk')
+    predictions = unpickle_and_predict(df_final5_new, filename = 'pickled/mlp_classifier_model.pk')
 
     # append predictions to df_final5_new and drop all columns that we don't care about
     df_final = df_final5_new[['home_team', 'away_team', 'date', 'home_team_win']]
