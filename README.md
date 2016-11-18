@@ -93,7 +93,10 @@ This file is simply exploring different models while using a KFold cross validat
 <b> FinalModel_xxxxx</b>
 There are a number of these files, each for a different final model that was explored. FinalModel_MLPR.py is the <b>actual</b> final model used to make predictions on future games. At this point, all other files should be up-to-date, so if you would like to look at predictions for future games, they will be added in this file. Please be careful NOT to add past games.
 
-Starting on line 118, copy this line of code for each game that you want to add. Home team is the first thing listed. Please use the three letter abbreviation for the team. If you do not know the abbreviation, please see the dictionary at the beginning of the DataCleaning file. The away team is listed next, followed by the date in YYYY-MM-DD format. It is crucial that home team and away team are listed in that order. After the code runs, you can look at the most recent games by typing in final.tail(). This will also show you the average accuracy of the model at this point in the season. Although, please note that the most accurate accuracy will be reported with the most current <b>completed</b> game.
+Starting on line 118, copy this line of code for each game that you want to add. Home team is the first thing listed. Please use the three letter abbreviation for the team. If you do not know the abbreviation, please see the dictionary at the beginning of the DataCleaning file. The away team is listed next, followed by the date. After the code runs, you can look at the most recent games by typing in final.tail(). This will also show you the average accuracy of the model at this point in the season. Although, please note that the most accurate accuracy will be reported with the most current <b>completed</b> game.
 
 <b> ModelVisualization</b> <br />
-This will produce the updated graphic shown above. 
+This will produce the updated graphic shown above.
+
+<b> OptimizeModels</b> <br />
+This was used to optimize models, but I had better luck by hand.
