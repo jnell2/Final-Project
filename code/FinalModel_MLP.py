@@ -125,7 +125,7 @@ if __name__ == '__main__':
     # df_games, df_final5_new = add_rows(df_all, df_games, 'DAL', 'COL', '2016-11-17')
     # df_games, df_final5_new = add_rows(df_all, df_games, 'VAN', 'ARI', '2016-11-17')
     # df_games, df_final5_new = add_rows(df_all, df_games, 'ANA', 'NJD', '2016-11-17')
-    df_games, df_final5_new = add_rows(df_all, df_games, 'LAK', 'EDM', '2016-11-17')
+    df_games, df_final5_new = add_rows(df_all, df_games, 'LAK', 'EDM', '2020-11-17')
     # every time you want to add a new row, copy this exact line and
     # only change team names and date
 
